@@ -35,57 +35,38 @@ public class MaterialAdder : EditorWindow
     private void FindAllActiveObjects()
     {
         GameObject[] objects = FindObjectsOfType<GameObject>();
-        foreach (var _object in objects)
+        if (objects.Length > 0)
         {
-            if (_object.activeInHierarchy)
+            foreach (var _object in objects)
             {
-                Debug.Log(_object.name);
+                if (_object.activeInHierarchy)
+                {
+                    if (_object.name.Split('_').Last().Contains("Tel"))
+                    {
+                        Debug.Log(_object.name);
+                        AddComponents(_object);
+                        
+                    }
+                }
             }
+        }
+        else
+        {
+            Debug.Log("[MaterialAdder] There is no active objects at active scene");
         }
     }
 
-    /*    private void FindObjects()
-    {
-        var info = new DirectoryInfo("D:/ProjectsUnity/TestingURP/Assets/Models");
-        var fileInfo = info.GetFiles();
-        for (int i = 0; i < fileInfo.Length; i++)
-        {
-            _teleportObjects.Add(fileInfo.GetValue(i));
-        }
-        foreach (var file in fileInfo)
-        {
-            var fileName = file.Name;
-            if (!fileName.Split('_').Last().Contains("Tel") || (fileName.Contains(".meta")))
+    private void AddComponents(GameObject currentGameObject)
+    {   
+            if (currentGameObject.GetComponent(script.GetClass()) != null)
             {
-                _teleportObjects.Remove(file);
-            }
-        }
-        AddComponents();
-    }
-
-    private void AddComponents()
-    {
-        foreach (var _object in _teleportObjects)
-        {
-            
-        }
-        Debug.Log(fileName);
-        fileName = fileName.Substring(0, fileName.Length - 4);
-        Debug.Log(fileName);
-        GameObject gameObject = GameObject.Find(fileName);
-        if (gameObject != null)
-        {
-            if (gameObject.GetComponent(script.GetClass()) != null ||
-                gameObject.GetComponent<Renderer>().material == newMaterial)
-            {
+                currentGameObject.GetComponent<MeshRenderer>().material = newMaterial;
+                Debug.Log("[MaterialAdder] "+currentGameObject.name + " mat added");
                 return;
             }
-
-            gameObject.GetComponent<MeshRenderer>().material = newMaterial;
-            gameObject.AddComponent(script.GetClass());
-        }
-        
+            
+            currentGameObject.AddComponent(script.GetClass());
+            currentGameObject.GetComponent<MeshRenderer>().material = newMaterial;
+            Debug.Log("[MaterialAdder] "+currentGameObject.name + " mat & script added");
     }
-    */
-    
 }
