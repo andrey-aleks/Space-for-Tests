@@ -6,14 +6,14 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using Object = System.Object;
 
 public class MaterialAdder : EditorWindow
 {
     public MonoScript script;
-    public Material newMaterial;
-
-    private List<object> _teleportObjects;
+    public Material material;
+    public string postfix;
 
     [MenuItem("Tools/MaterialAdder")]
     public static void ShowWindow()
@@ -23,12 +23,12 @@ public class MaterialAdder : EditorWindow
 
     public void OnGUI()
     {
-        newMaterial = (Material) EditorGUILayout.ObjectField("Material", newMaterial, typeof(Material));
-        script = (MonoScript) EditorGUILayout.ObjectField("Script", script, typeof(MonoScript));
+        material = (Material) EditorGUILayout.ObjectField("Material to add", material, typeof(Material));
+        script = (MonoScript) EditorGUILayout.ObjectField("Script to add", script, typeof(MonoScript));
+        postfix = EditorGUILayout.TextField("Postfix without '_'", postfix);
         if (GUILayout.Button("Add"))
         {
-           // FindObjects();
-           FindAllActiveObjects();
+            FindAllActiveObjects();
         }
     }
 
@@ -41,32 +41,37 @@ public class MaterialAdder : EditorWindow
             {
                 if (_object.activeInHierarchy)
                 {
-                    if (_object.name.Split('_').Last().Contains("Tel"))
+                    if (_object.name.Split('_').Last().Contains(postfix))
                     {
-                        Debug.Log(_object.name);
                         AddComponents(_object);
-                        
                     }
                 }
             }
         }
         else
         {
-            Debug.Log("[MaterialAdder] There is no active objects at active scene");
+            Debug.Log("[MaterialAdder] There is no objects at scene");
         }
     }
 
     private void AddComponents(GameObject currentGameObject)
-    {   
-            if (currentGameObject.GetComponent(script.GetClass()) != null)
-            {
-                currentGameObject.GetComponent<MeshRenderer>().material = newMaterial;
-                Debug.Log("[MaterialAdder] "+currentGameObject.name + " mat added");
-                return;
-            }
-            
-            currentGameObject.AddComponent(script.GetClass());
-            currentGameObject.GetComponent<MeshRenderer>().material = newMaterial;
-            Debug.Log("[MaterialAdder] "+currentGameObject.name + " mat & script added");
+    {
+        Component addedScript = currentGameObject.GetComponent(script.GetClass());
+
+        if (addedScript != null && currentGameObject.GetComponent<Renderer>().sharedMaterial == material)
+        {
+            return;
+        }
+
+        if (addedScript != null)
+        {
+            currentGameObject.GetComponent<Renderer>().sharedMaterial = material;
+            Debug.Log("[MaterialAdder] " + currentGameObject.name + " mat added");
+            return;
+        }
+
+        currentGameObject.AddComponent(script.GetClass());
+        currentGameObject.GetComponent<MeshRenderer>().sharedMaterial = material;
+        Debug.Log("[MaterialAdder] " + currentGameObject.name + " mat & script added");
     }
 }
