@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: mat_Flame
+  m_Shader: {fileID: -6465566751694194690, guid: c9a7aca148887154b97b48cbc0a10119, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - Texture2D_86a810539d86426fb04ab5a794e1195f:
+        m_Texture: {fileID: 2800000, guid: 3b8ee4739e00f9c43b96c49c1007194d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - Vector1_071e05b13b5d40cabc8eae7d67cc89cb: 2
+    - Vector1_267e65ab340c4dd28a7b079b1fe28403: -1.18
+    - Vector1_6d9883722b234b4c8c26622365b20cb4: 5
+    - Vector1_a839cb79739c4c7fb5ac16d7fe7d6c47: 0.23
+    m_Colors:
+    - Color_a6122e1f92944910a307a35bc6e826af: {r: 13.54363, g: 1.943489, b: 0.4471955, a: 0}
+    - Vector2_9f340a41db794cff931eca4e81fb6c96: {r: -0.1, g: -0.7, b: 0, a: 0}
+    - Vector2_d3d5a291bcc441ac94ced5bce57898b4: {r: 0, g: -0.5, b: 0, a: 0}
+  m_BuildTextureStacks: []
+--- !u!114 &8216955590590671700
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 4
