@@ -2,8 +2,12 @@ Shader "Unlit/sh_SimpleUnlit"
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
+        _ColorA ("Color A", Color) = (0,0,0,0)
+        _ColorB ("Color B", Color) = (1,1,1,1)
+        _ColorStart ("Color Start", Range(0, 1)) = 0
+        _ColorEnd ("Color End", Range(0, 1)) = 1
         _Multi ("Multi", Float) = 1
+        _Scale ("Scale", Float) = 1
     }
     SubShader
     {
@@ -17,8 +21,17 @@ Shader "Unlit/sh_SimpleUnlit"
 
             #include "UnityCG.cginc"
 
-            float4 _Color;
+            float4 _ColorA;
+            float4 _ColorB;
+            float _ColorStart;
+            float _ColorEnd;
             float _Multi;
+            float _Scale;
+
+            float InvLerp (float a, float b, float v)
+            {
+                return (v-a)/b-a;
+            }
             
             struct MeshData
             {
@@ -39,13 +52,16 @@ Shader "Unlit/sh_SimpleUnlit"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.normal = UnityObjectToWorldNormal(v.normal);
+                o.uv = v.uv * _Scale;
+                o.normal = UnityObjectToWorldNormal(v.normal) * _Multi;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return (float4(i.normal, 1) * _Multi);
+               // return InvLerp(_ColorA, _ColorB, i.uv.x);
+               return lerp(_ColorA, _ColorB, i.uv.x);
+               // InvLerp()
             }
             ENDCG
         }
