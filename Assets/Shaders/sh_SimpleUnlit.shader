@@ -59,8 +59,11 @@ Shader "Unlit/sh_SimpleUnlit"
 
             fixed4 frag (v2f i) : SV_Target
             {
-               // return InvLerp(_ColorA, _ColorB, i.uv.x);
-               return lerp(_ColorA, _ColorB, i.uv.x);
+                float t = InvLerp(_ColorStart, _ColorEnd, i.uv.x);
+                return frac(t);
+               float4 outValue = saturate(lerp(_ColorA, _ColorB, t));
+               return outValue;
+               // return lerp(_ColorA, _ColorB, i.uv.x);
                // InvLerp()
             }
             ENDCG
