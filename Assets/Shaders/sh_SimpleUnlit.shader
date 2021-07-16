@@ -21,6 +21,8 @@ Shader "Unlit/sh_SimpleUnlit"
 
             #include "UnityCG.cginc"
 
+            #define TAU 6.28318530718
+
             float4 _ColorA;
             float4 _ColorB;
             float _ColorStart;
@@ -59,8 +61,11 @@ Shader "Unlit/sh_SimpleUnlit"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float t = InvLerp(_ColorStart, _ColorEnd, i.uv.x);
-                return frac(t);
+                // float t = InvLerp(_ColorStart, _ColorEnd, i.uv.x);
+                // return frac(t);
+                float xOffset = cos (i.uv.y * TAU * 6) * 0.01 + _Time.x *4;
+                float t = cos((i.uv.x + xOffset) * TAU * 8) * 0.5 + 0.2;
+                return t;
                float4 outValue = saturate(lerp(_ColorA, _ColorB, t));
                return outValue;
                // return lerp(_ColorA, _ColorB, i.uv.x);
