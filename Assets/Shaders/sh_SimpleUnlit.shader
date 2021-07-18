@@ -6,15 +6,22 @@ Shader "Unlit/sh_SimpleUnlit"
         _ColorB ("Color B", Color) = (1,1,1,1)
         _ColorStart ("Color Start", Range(0, 1)) = 0
         _ColorEnd ("Color End", Range(0, 1)) = 1
-        _Multi ("Multi", Float) = 1
+        _Speed ("Speed", Float) = 0.1
         _Scale ("Scale", Float) = 1
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags
+        {
+            "RenderType"="Transparent"
+            "Queue" = "Transparent"
+        }
 
         Pass
         {
+            Cull Off
+            Zwrite Off
+            Blend One One
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -27,20 +34,19 @@ Shader "Unlit/sh_SimpleUnlit"
             float4 _ColorB;
             float _ColorStart;
             float _ColorEnd;
-            float _Multi;
+            float _Speed;
             float _Scale;
 
-            float InvLerp (float a, float b, float v)
+            float InvLerp(float a, float b, float v)
             {
-                return (v-a)/b-a;
+                return (v - a) / b - a;
             }
-            
+
             struct MeshData
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD1;
                 float3 normal : NORMAL;
-                
             };
 
             struct v2f
@@ -50,26 +56,31 @@ Shader "Unlit/sh_SimpleUnlit"
                 float3 normal : TEXCOORD0;
             };
 
-            v2f vert (MeshData v)
+            v2f vert(MeshData v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv * _Scale;
-                o.normal = UnityObjectToWorldNormal(v.normal) * _Multi;
+                o.uv = v.uv;
+                o.normal = UnityObjectToWorldNormal(v.normal);
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            fixed4 frag(v2f i) : SV_Target
             {
                 // float t = InvLerp(_ColorStart, _ColorEnd, i.uv.x);
                 // return frac(t);
-                float xOffset = cos (i.uv.y * TAU * 6) * 0.01 + _Time.x *4;
-                float t = cos((i.uv.x + xOffset) * TAU * 8) * 0.5 + 0.2;
-                return t;
-               float4 outValue = saturate(lerp(_ColorA, _ColorB, t));
-               return outValue;
-               // return lerp(_ColorA, _ColorB, i.uv.x);
-               // InvLerp()
+
+                float xOffset = cos(i.uv.x * TAU * 8) * 0.01;
+                float t = cos((i.uv.y + xOffset - _Time.y * _Speed) * TAU * 5) * 0.5 + 0.5;
+                t *= 1 - i.uv.y;
+                float capRemover = abs(i.normal.y) < 0.999;
+                float waves = t * capRemover;
+                float4 gradient = lerp (_ColorA, _ColorB, i.uv.y);
+                return gradient * waves; 
+                float4 outValue = saturate(lerp(_ColorA, _ColorB, t));
+                return outValue;
+
+                // InvLerp()
             }
             ENDCG
         }
