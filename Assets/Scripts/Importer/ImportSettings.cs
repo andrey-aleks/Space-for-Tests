@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace Utilities.Importer
 {
@@ -6,7 +9,16 @@ namespace Utilities.Importer
     public class ImportSettings : ScriptableObject
     {
         public string path;
-        //public static ImportSettings Instance;
+        private static ImportSettings _instance;
+        public static ImportSettings Instance => _instance ?? (_instance = LoadAsset());
+
+        private static ImportSettings LoadAsset([CallerFilePath] string callerFilepath = null)
+        {
+            var folder = Path.GetDirectoryName(callerFilepath);
+            folder = folder.Substring(folder.LastIndexOf("/Assets/", StringComparison.Ordinal) + 1);
+            return null;
+        }
+        
 
         public bool doPostProcess;
         

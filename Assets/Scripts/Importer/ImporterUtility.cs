@@ -9,6 +9,7 @@ namespace Importer
 {
     public static class ImporterUtility
     {
+        private static string NAME = "[ImporterUtility]: ";
         public static void Import(string path)
         {
             string pattern = @"\w*\.fbx";
@@ -23,7 +24,7 @@ namespace Importer
             }
 
             File.Copy(path, currentDir + "Models\\" + filename + "\\" + "mesh_" + filename.Split('_').First() + ".fbx");
-            Debug.Log("[Importer] fbx imported to folder Assets/Models/" + filename + "/");
+            Debug.Log($"{NAME}fbx imported to folder Assets/Models/{filename}/");
             string currentModelPath = "Assets\\Models\\" + filename + "\\" + "mesh_" + filename + ".fbx";
             AssetDatabase.ImportAsset(currentModelPath);
 
@@ -40,7 +41,7 @@ namespace Importer
                     "Assets/Models/" + filename + "/Materials/" + model.name + ".mat");
                 if (!string.IsNullOrEmpty(message))
                 {
-                    Debug.Log(message);
+                    Debug.Log(NAME + message);
                 }
             }
 
