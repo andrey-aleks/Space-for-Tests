@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Utilities.Importer;
+using Object = System.Object;
 
 namespace Importer
 {
     public static class ImporterUtility
     {
+        // s/^[a-zA-Z0-9]*\_//
+        // s/[_][a-zA-Z0-9]*\.[a-zA-Z0-9]*$
+        // s/\.[a-zA-Z0-9]*$//
         private static string NAME = "[ImporterUtility]: ";
         private static readonly ImportSettings Settings = ImportSettings.Instance;
 
@@ -53,11 +58,16 @@ namespace Importer
                 }
             }
 
+            var mats = AssetDatabase.LoadAllAssetsAtPath($"{Settings.parentFolder}{filename}\\Materials\\");
+            
+            var materials = mats.ToList(); 
+            
             Material material =
                 (Material) AssetDatabase.LoadMainAssetAtPath(
                     $"{Settings.parentFolder}{filename}\\Materials\\mat_{filename}.mat");
 
             // textures import
+            
             string texturePath = commonPath + @"Textures\";
             pattern = @"tex_\w*\.png";
             Regex textureRegex = new Regex(pattern, RegexOptions.IgnoreCase);
@@ -67,6 +77,10 @@ namespace Importer
                 AssetDatabase.CreateFolder("Assets/Models/" + filename, "Textures");
             }
 
+            foreach (var mat in materials)
+            {
+                // STOPED HERE
+            }
             foreach (var sourceTexturePath in Directory.GetFiles(texturePath))
             {
                 Match textureName = textureRegex.Match(sourceTexturePath);
@@ -99,28 +113,6 @@ namespace Importer
             }
 
             EditorApplication.ExecuteMenuItem("File/Save Project");
-        }
-
-        /// <summary>
-        /// Create folder under ImportSettings.parentFolder at path
-        /// </summary>
-        /// <param name="path"></param>
-        private static void CreateFolder(string path)
-        {
-            if (!AssetDatabase.IsValidFolder(Settings.parentFolder + path))
-            {
-                Debug.Log("___" + Settings.parentFolder + path);
-
-                AssetDatabase.CreateFolder(Settings.parentFolder.Remove(Settings.parentFolder.Length - 1),
-                    path); // -1 because of redundant "/" at the end    
-            }
-            else Debug.Log(NAME + path + " already exists!");
-        }
-
-        public static void CreateObject()
-        {
-            //create folder
-            //file.copy
         }
     }
 }
