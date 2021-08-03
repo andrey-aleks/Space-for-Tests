@@ -18,22 +18,27 @@ namespace Importer
         private static string NAME = "[ImporterUtility]: ";
         private static readonly ImportSettings Settings = ImportSettings.Instance;
 
-        public static void Import(string path)
+        public static void Import(string sourceFilePath)
         {
             // fbx import
-            string pattern = Settings.regex;
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            string commonPath = regex.Replace(path, "");
-            string filename = path.Split('\\').Last().Split('.').First().Split('_')[1];
-            string currentDir = Environment.CurrentDirectory + "\\Assets\\";
+            Regex fbxRegex = new Regex(@"\w*\.fbx", RegexOptions.IgnoreCase);
+            var sourceFolderPath = fbxRegex.Replace(sourceFilePath, ""); // get source folder path
 
+            var filename = sourceFilePath.Split('/').Last().Split('.').First(); // get name of fbx
+
+            Regex meshRegex = new Regex(@"mesh_", RegexOptions.IgnoreCase);
+            filename = meshRegex.Replace(filename, ""); // remove mesh_ from name
+            
+            var currentDir = Environment.CurrentDirectory + "\\Assets\\";
+            
+            // create model's folder under Settings.parentFolder
             if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename))
             {
                 AssetDatabase.CreateFolder(Settings.parentFolder.Remove(Settings.parentFolder.Length - 1),
                     filename); // -1 because of redundant "/" at the end
             }
 
-            File.Copy(path, $"{currentDir}Models\\{filename}\\mesh_{filename.Split('_').First()}.fbx");
+            File.Copy(sourceFilePath, $"{currentDir}Models\\{filename}\\mesh_{filename}.fbx"); // copy fbx
             Debug.Log($"{NAME}fbx imported to folder {Settings.parentFolder}{filename}\\");
             string currentModelPath = $"{Settings.parentFolder}{filename}\\mesh_{filename}.fbx";
             AssetDatabase.ImportAsset(currentModelPath);
@@ -67,9 +72,8 @@ namespace Importer
 
             // textures import
             
-            string texturePath = commonPath + @"Textures\";
-            pattern = @"tex_\w*\.png";
-            Regex textureRegex = new Regex(pattern, RegexOptions.IgnoreCase);
+            string texturePath = sourceFolderPath + @"Textures\";
+            Regex textureRegex = new Regex(@"tex_\w*\.png", RegexOptions.IgnoreCase);
 
             if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures/"))
             {
@@ -87,6 +91,8 @@ namespace Importer
                 File.Copy(sourceTexturePath, currentTexturePath);
                 string projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + textureName;
                 AssetDatabase.ImportAsset(projectTexturePath);
+                
+                // textures setting to material
                 switch (textureName.ToString().Split('_').Last().Split('.').First())
                 {
                     case "BC":
