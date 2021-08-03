@@ -17,7 +17,7 @@ MonoBehaviour:
   baseColorMapName: _BaseMap
   normalPostfix: N
   normalMapName: _BumpMap
-  metallicPostfix: M
+  metallicPostfix: MS
   metallicMapName: _MetallicGlossMap
   occlusionPostfix: AO
   occlusionMapName: _OcclusionMap

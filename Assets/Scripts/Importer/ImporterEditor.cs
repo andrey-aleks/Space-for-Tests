@@ -1,11 +1,10 @@
 ﻿using UnityEditor;
-using Utilities.Importer;
 
 namespace Importer
 {
     public class ImporterEditor : EditorWindow
     {
-        private static readonly ImportSettings Settings = ImportSettings.Instance;
+        private static readonly ImporterSettings Settings = ImporterSettings.Instance;
 
         [MenuItem("Assets/Custom Import")]
         public static void ShowWindow()

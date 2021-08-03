@@ -4,10 +4,10 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
-namespace Utilities.Importer
+namespace Importer
 {
     [CreateAssetMenu(fileName = "CustomImportSettings", menuName = "Custom Import Settings", order = 1010)]
-    public class ImportSettings : ScriptableObject
+    public class ImporterSettings : ScriptableObject
     {
         //[Tooltip(@"Should tool process drag&dropped files or not?")]
         //public bool processDragAndDrop = false;
@@ -39,17 +39,17 @@ namespace Utilities.Importer
         public string textureFormat = ".png";
         
         
-        private static ImportSettings _instance;
-        public static ImportSettings Instance => _instance ?? (_instance = LoadAsset());
+        private static ImporterSettings _instance;
+        public static ImporterSettings Instance => _instance ?? (_instance = LoadAsset());
 
-        private static ImportSettings LoadAsset([CallerFilePath] string callerFilepath = null)
+        private static ImporterSettings LoadAsset([CallerFilePath] string callerFilepath = null)
         {
             var path = GetAssetPath();
-            var asset = AssetDatabase.LoadAssetAtPath<ImportSettings>(path);
+            var asset = AssetDatabase.LoadAssetAtPath<ImporterSettings>(path);
 
             if (asset == null)
             {
-                asset = CreateInstance<ImportSettings>();
+                asset = CreateInstance<ImporterSettings>();
                 AssetDatabase.CreateAsset(asset, path);
                 AssetDatabase.SaveAssets();
             }

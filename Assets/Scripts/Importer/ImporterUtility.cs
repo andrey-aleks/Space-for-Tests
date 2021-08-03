@@ -5,14 +5,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using Utilities.Importer;
 
 namespace Importer
 {
     public static class ImporterUtility
     {
         private const string NAME = "[ImporterUtility]: ";
-        private static readonly ImportSettings Settings = ImportSettings.Instance;
+        private static readonly ImporterSettings Settings = ImporterSettings.Instance;
 
         public static void Import(string sourceFilePath)
         {
