@@ -89,7 +89,8 @@ namespace Importer
             // textures import
             
             var texturePath = sourceFolderPath + @"Textures\";
-
+            Material material = null;
+            
             foreach (var sourceTexturePath in Directory.GetFiles(texturePath))
             {
                 // check if textures exists 
@@ -125,8 +126,7 @@ namespace Importer
                 textureName = textureName.Remove(textureName.Length - 1);
                 Debug.Log("new tn: " + textureName);
                 Debug.Log("type: " + textureType);
-
-                Material material = null;
+                
                 
                 foreach (var mat in materialsNames)
                 {
@@ -134,6 +134,7 @@ namespace Importer
                     {
                         material = (Material) mat.Value;
                         Debug.Log("Value is " + mat.Value.ToString());
+                        break;
                     }
                 }
                 Debug.Log("mat is " + material);
@@ -169,8 +170,7 @@ namespace Importer
                             break;
                     }                    
                 }
-
-
+                AssetDatabase.ImportAsset(currentModelPath);
             }
 
             EditorApplication.ExecuteMenuItem("File/Save Project");
