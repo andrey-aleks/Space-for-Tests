@@ -19,7 +19,6 @@ namespace Utilities.Importer
         private static ImportSettings LoadAsset([CallerFilePath] string callerFilepath = null)
         {
             var path = GetAssetPath();
-            Debug.Log("path: " + path);
             var asset = AssetDatabase.LoadAssetAtPath<ImportSettings>(path);
 
             if (asset == null)
@@ -35,7 +34,6 @@ namespace Utilities.Importer
         private static string GetAssetPath([CallerFilePath] string callerFilePath = null)
         {
             var folder = Path.GetDirectoryName(callerFilePath);
-            Debug.Log("path wo " + folder);
             folder = folder.Substring(folder.LastIndexOf("\\Assets\\", StringComparison.Ordinal) + 1);
             return Path.Combine(folder, "CustomImportSettings.asset");
         }

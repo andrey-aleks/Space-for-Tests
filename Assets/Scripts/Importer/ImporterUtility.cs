@@ -22,7 +22,6 @@ namespace Importer
         {
             // fbx import
             string pattern = Settings.regex;
-            Debug.Log(pattern);
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
             string commonPath = regex.Replace(path, "");
             string filename = path.Split('\\').Last().Split('.').First().Split('_')[1];
@@ -72,21 +71,21 @@ namespace Importer
             pattern = @"tex_\w*\.png";
             Regex textureRegex = new Regex(pattern, RegexOptions.IgnoreCase);
 
-            if (!AssetDatabase.IsValidFolder("Assets/Models/" + filename + "/Textures/"))
+            if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures/"))
             {
-                AssetDatabase.CreateFolder("Assets/Models/" + filename, "Textures");
+                AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
             }
 
             foreach (var mat in materials)
             {
-                // STOPED HERE
+                
             }
             foreach (var sourceTexturePath in Directory.GetFiles(texturePath))
             {
                 Match textureName = textureRegex.Match(sourceTexturePath);
                 string currentTexturePath = currentDir + "\\Models\\" + filename + "\\Textures\\" + textureName;
                 File.Copy(sourceTexturePath, currentTexturePath);
-                string projectTexturePath = "Assets\\Models\\" + filename + "\\Textures\\" + textureName;
+                string projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + textureName;
                 AssetDatabase.ImportAsset(projectTexturePath);
                 switch (textureName.ToString().Split('_').Last().Split('.').First())
                 {

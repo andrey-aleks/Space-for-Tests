@@ -7,7 +7,7 @@ namespace Utilities.Importer
 {
     public class ImportPostProcessor : AssetPostprocessor
     {
-        private static string assetPath;
+
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets,
             string[] movedFromAssetPaths)
         {

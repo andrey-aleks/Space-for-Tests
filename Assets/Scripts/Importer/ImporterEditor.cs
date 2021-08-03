@@ -14,12 +14,6 @@ namespace Importer
             Init();
         }
 
-        private void OnEnable()
-        {
-            
-            Debug.Log("enabled");
-        }
-
         private static void Init()
         {
             string path = EditorUtility.OpenFilePanel("Open File", "", "");
