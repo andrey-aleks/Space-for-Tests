@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using Utilities.Importer;
 using Object = System.Object;
 
@@ -20,51 +21,66 @@ namespace Importer
 
         public static void Import(string sourceFilePath)
         {
-            // fbx import
+            // regex inits
             Regex fbxRegex = new Regex(@"\w*\.fbx", RegexOptions.IgnoreCase);
+            Regex meshRegex = new Regex(@"mesh_", RegexOptions.IgnoreCase);
+            Regex matRegex = new Regex(@"mat_", RegexOptions.IgnoreCase);
+            Regex textureRegex = new Regex(@"tex_\w*\.png", RegexOptions.IgnoreCase);   
+            
+            
+            // fbx import
             var sourceFolderPath = fbxRegex.Replace(sourceFilePath, ""); // get source folder path
 
             var filename = sourceFilePath.Split('/').Last().Split('.').First(); // get name of fbx
-
-            Regex meshRegex = new Regex(@"mesh_", RegexOptions.IgnoreCase);
+            
             filename = meshRegex.Replace(filename, ""); // remove mesh_ from name
-            
-            var currentDir = Environment.CurrentDirectory + "\\Assets\\";
-            
+
             // create model's folder under Settings.parentFolder
             if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename))
             {
                 AssetDatabase.CreateFolder(Settings.parentFolder.Remove(Settings.parentFolder.Length - 1),
                     filename); // -1 because of redundant "/" at the end
             }
+            
+            // create Materials folder under /Settings.parentFolder/filename/
+            if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Materials/"))
+            {
+                AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Materials");
+            }            
+            
+            var currentDir = Environment.CurrentDirectory + @"\" + Settings.parentFolder;
+            Debug.Log("cd: " + currentDir);
 
-            File.Copy(sourceFilePath, $"{currentDir}Models\\{filename}\\mesh_{filename}.fbx"); // copy fbx
+            File.Copy(sourceFilePath, $"{currentDir}{filename}\\mesh_{filename}.fbx"); // copy fbx to assets
             Debug.Log($"{NAME}fbx imported to folder {Settings.parentFolder}{filename}\\");
             string currentModelPath = $"{Settings.parentFolder}{filename}\\mesh_{filename}.fbx";
             AssetDatabase.ImportAsset(currentModelPath);
 
+            
             // materials import
             var importedModels = AssetDatabase.LoadAllAssetsAtPath(currentModelPath)
-                .Where(x => x.GetType() == typeof(Material));
+                .Where(x => x.GetType() == typeof(Material)); // get all materials from fbx
 
-            if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Materials/"))
-            {
-                AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Materials");
-            }
-
+            var materialsNames = new Dictionary<string, object>();
+            
             foreach (var model in importedModels)
             {
                 var message = AssetDatabase.ExtractAsset(model,
-                    Settings.parentFolder + filename + @"\Materials\" + model.name + ".mat");
+                    Settings.parentFolder + filename + @"\Materials\" + model.name + ".mat"); // extract materials
+                materialsNames.Add(matRegex.Replace(model.name, ""), model); // add mat.name(w/o mat_) and mat to Dictionary
                 if (!string.IsNullOrEmpty(message))
                 {
-                    Debug.Log(NAME + message);
+                    Debug.Log(NAME + message); // log if error
                 }
             }
 
-            var mats = AssetDatabase.LoadAllAssetsAtPath($"{Settings.parentFolder}{filename}\\Materials\\");
-            
-            var materials = mats.ToList(); 
+            if (materialsNames.Count > 0)
+            {
+                foreach (var mat in materialsNames)
+                {
+                    Debug.Log(mat.Key + " ||| " + mat.Value);
+                }
+            } else Debug.Log("empty");
             
             Material material =
                 (Material) AssetDatabase.LoadMainAssetAtPath(
@@ -72,26 +88,29 @@ namespace Importer
 
             // textures import
             
-            string texturePath = sourceFolderPath + @"Textures\";
-            Regex textureRegex = new Regex(@"tex_\w*\.png", RegexOptions.IgnoreCase);
+            var texturePath = sourceFolderPath + @"Textures\";
 
-            if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures/"))
-            {
-                AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
-            }
-
-            foreach (var mat in materials)
-            {
-                
-            }
             foreach (var sourceTexturePath in Directory.GetFiles(texturePath))
             {
-                Match textureName = textureRegex.Match(sourceTexturePath);
-                string currentTexturePath = currentDir + "\\Models\\" + filename + "\\Textures\\" + textureName;
-                File.Copy(sourceTexturePath, currentTexturePath);
-                string projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + textureName;
-                AssetDatabase.ImportAsset(projectTexturePath);
+                // check if textures exists 
+                if (Directory.GetFiles(texturePath).Length < 1)
+                {
+                    Debug.Log($"{NAME}for {filename} no textures!");
+                    return;
+                }
+
+                // create Textures folder under /Settings.parentFolder/filename/
+                if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures/"))
+                {
+                    AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
+                }
                 
+                var textureName = textureRegex.Match(sourceTexturePath);
+                var currentTexturePath = currentDir + filename + "\\Textures\\" + textureName;
+                File.Copy(sourceTexturePath, currentTexturePath);
+                var projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + textureName;
+                AssetDatabase.ImportAsset(projectTexturePath);
+
                 // textures setting to material
                 switch (textureName.ToString().Split('_').Last().Split('.').First())
                 {
