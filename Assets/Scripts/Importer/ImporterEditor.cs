@@ -1,14 +1,13 @@
-﻿using System.Runtime.CompilerServices;
-using TMPro;
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEditor;
 using Utilities.Importer;
 
 namespace Importer
 {
     public class ImporterEditor : EditorWindow
     {
-        [MenuItem("Assets/-- Custom Import")]
+        private static readonly ImportSettings Settings = ImportSettings.Instance;
+
+        [MenuItem("Assets/Custom Import")]
         public static void ShowWindow()
         {
             Init();
@@ -24,5 +23,16 @@ namespace Importer
 
             // ImportSettings.Instance.path = EditorUtility.OpenFilePanel("Open File", "", "");
         }
+
+
+        /*
+        private void DrawDragAndDrop()
+        {
+            if (Event.current.type == EventType.DragPerform)
+            {
+                Debug.Log("path " + DragAndDrop.paths.First());
+            }
+        }
+        */
     }
 }

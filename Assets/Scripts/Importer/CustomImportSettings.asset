@@ -12,5 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 689e2afc6b328cf47b81ebe9e73505f9, type: 3}
   m_Name: CustomImportSettings
   m_EditorClassIdentifier: 
-  regex: \w*\.fbx
   parentFolder: Assets\Models\
+  baseColorPostfix: BC
+  baseColorMapName: _BaseMap
+  normalPostfix: N
+  normalMapName: _BumpMap
+  metallicPostfix: M
+  metallicMapName: _MetallicGlossMap
+  occlusionPostfix: AO
+  occlusionMapName: _OcclusionMap
+  textureFormat: .png
