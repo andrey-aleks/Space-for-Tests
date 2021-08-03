@@ -9,9 +9,21 @@ namespace Utilities.Importer
     [CreateAssetMenu(fileName = "CustomImportSettings", menuName = "Custom Import Settings", order = 1010)]
     public class ImportSettings : ScriptableObject
     {
-        public string regex;
         [Tooltip(@"Project folder with '\' at the end")]
-        public string parentFolder;
+        public string parentFolder = @"Assets\Models\";
+
+        public string baseColorPostfix = "BC";
+        public string baseColorMapName = "_BaseMap";
+        
+        public string normalPostfix = "N";
+        public string normalMapName = "_BumpMap";
+        
+        public string metallicPostfix = "M";
+        public string metallicMapName = "_MetallicGlossMap";
+        
+        public string occlusionPostfix = "AO";
+        public string occlusionMapName = "_OcclusionMap";
+        
         
         private static ImportSettings _instance;
         public static ImportSettings Instance => _instance ?? (_instance = LoadAsset());

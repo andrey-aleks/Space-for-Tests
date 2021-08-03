@@ -67,7 +67,9 @@ namespace Importer
             {
                 var message = AssetDatabase.ExtractAsset(model,
                     Settings.parentFolder + filename + @"\Materials\" + model.name + ".mat"); // extract materials
-                materialsNames.Add(matRegex.Replace(model.name, ""), model); // add mat.name(w/o mat_) and mat to Dictionary
+                var materialAsset = AssetDatabase.LoadAssetAtPath<Material>(Settings.parentFolder + filename + @"\Materials\" + model.name + ".mat");
+                
+                materialsNames.Add(matRegex.Replace(model.name, ""), materialAsset); // add mat.name(w/o mat_) and mat to Dictionary
                 if (!string.IsNullOrEmpty(message))
                 {
                     Debug.Log(NAME + message); // log if error
@@ -82,9 +84,7 @@ namespace Importer
                 }
             } else Debug.Log("empty");
             
-            Material material =
-                (Material) AssetDatabase.LoadMainAssetAtPath(
-                    $"{Settings.parentFolder}{filename}\\Materials\\mat_{filename}.mat");
+
 
             // textures import
             
@@ -100,40 +100,77 @@ namespace Importer
                 }
 
                 // create Textures folder under /Settings.parentFolder/filename/
-                if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures/"))
+                if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures"))
                 {
                     AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
                 }
                 
-                var textureName = textureRegex.Match(sourceTexturePath);
-                var currentTexturePath = currentDir + filename + "\\Textures\\" + textureName;
+                var fullTextureName = textureRegex.Match(sourceTexturePath).Value;
+                Debug.Log("tn: " + fullTextureName);
+                var currentTexturePath = currentDir + filename + "\\Textures\\" + fullTextureName;
                 File.Copy(sourceTexturePath, currentTexturePath);
-                var projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + textureName;
+                var projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + fullTextureName;
                 AssetDatabase.ImportAsset(projectTexturePath);
+                
+                // textureName mess
+                Regex texSubRegex = new Regex(@"tex_", RegexOptions.IgnoreCase);
+                Regex pngSubRegex = new Regex(@".png", RegexOptions.IgnoreCase);
 
-                // textures setting to material
-                switch (textureName.ToString().Split('_').Last().Split('.').First())
+                var textureName = texSubRegex.Replace(fullTextureName, "");
+                textureName = pngSubRegex.Replace(textureName, "");
+                var textureType = textureName.Split('_').Last();
+
+                Regex typeSubRegex = new Regex(textureType, RegexOptions.IgnoreCase);
+                textureName = typeSubRegex.Replace(textureName, "");
+                textureName = textureName.Remove(textureName.Length - 1);
+                Debug.Log("new tn: " + textureName);
+                Debug.Log("type: " + textureType);
+
+                Material material = null;
+                
+                foreach (var mat in materialsNames)
                 {
-                    case "BC":
-                        material.SetTexture("_BaseMap",
-                            (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
-                        break;
-                    case "N":
-                        material.SetTexture("_BumpMap",
-                            (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
-                        TextureImporter textureImporter =
-                            AssetImporter.GetAtPath(projectTexturePath) as TextureImporter;
-                        textureImporter.textureType = TextureImporterType.NormalMap;
-                        break;
-                    case "M":
-                        material.SetTexture("_MetallicGlossMap",
-                            (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
-                        break;
-                    case "AO":
-                        material.SetTexture("_OcclusionMap",
-                            (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
-                        break;
+                    if (textureName.Equals(mat.Key))
+                    {
+                        material = (Material) mat.Value;
+                        Debug.Log("Value is " + mat.Value.ToString());
+                    }
                 }
+                Debug.Log("mat is " + material);
+                if (material == null)
+                {
+                    Debug.Log($"{NAME} texture {textureName} doesn't matches with materials names!");
+                    continue;
+                }
+                else
+                {
+                    // textures setting to material
+                    switch (textureType)
+                    {
+                        case "BC": // can't use Settings.postfix, how to fix?
+                        
+                            material.SetTexture(Settings.baseColorMapName,
+                                (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
+                            break;
+                        case "N":
+                            material.SetTexture(Settings.normalMapName,
+                                (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
+                            TextureImporter textureImporter =
+                                AssetImporter.GetAtPath(projectTexturePath) as TextureImporter;
+                            textureImporter.textureType = TextureImporterType.NormalMap;
+                            break;
+                        case "M":
+                            material.SetTexture(Settings.metallicMapName,
+                                (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
+                            break;
+                        case "AO":
+                            material.SetTexture(Settings.occlusionMapName,
+                                (Texture) AssetDatabase.LoadMainAssetAtPath(projectTexturePath));
+                            break;
+                    }                    
+                }
+
+
             }
 
             EditorApplication.ExecuteMenuItem("File/Save Project");
