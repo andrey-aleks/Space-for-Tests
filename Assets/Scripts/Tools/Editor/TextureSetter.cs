@@ -47,7 +47,7 @@ namespace Editor
                                 targetMat.SetTexture("_BumpMap", (Texture)obj);
                                 Debug.Log(nameForDebug + obj.name + " is set to " + targetMat.name);
                                 break;
-                            case "M":
+                            case "MS":
                                 targetMat.SetTexture("_MetallicGlossMap", (Texture)obj);
                                 Debug.Log(nameForDebug + obj.name + " is set to " + targetMat.name);
                                 break;

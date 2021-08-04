@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Importer
+namespace Importer.Editor
 {
     public class ImporterEditor : EditorWindow
     {

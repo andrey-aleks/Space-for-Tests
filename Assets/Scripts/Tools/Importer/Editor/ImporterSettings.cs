@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
-namespace Importer
+namespace Importer.Editor
 {
     [CreateAssetMenu(fileName = "CustomImportSettings", menuName = "Custom Import Settings", order = 1010)]
     public class ImporterSettings : ScriptableObject
@@ -25,7 +25,7 @@ namespace Importer
         [Tooltip(@"Property name for the current texture in the Shader")]
         public string normalMapName = "_BumpMap";
         
-        public string metallicPostfix = "M";
+        public string metallicPostfix = "MS";
         
         [Tooltip(@"Property name for the current texture in the Shader")]
         public string metallicMapName = "_MetallicGlossMap";
@@ -37,6 +37,9 @@ namespace Importer
 
         [Tooltip(@"Texture format with '.' at start. Example: .png")]
         public string textureFormat = ".png";
+
+        [Tooltip(@"Should importer overwrite existing files?")]
+        public bool enableOverwrite = false;
         
         
         private static ImporterSettings _instance;
