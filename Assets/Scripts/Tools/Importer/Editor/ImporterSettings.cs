@@ -40,6 +40,8 @@ namespace Importer.Editor
 
         [Tooltip(@"Should importer overwrite existing files?")]
         public bool enableOverwrite = false;
+
+        public string path = "Assets/Custom Import";
         
         
         private static ImporterSettings _instance;

@@ -6,7 +6,7 @@ namespace Importer.Editor
     {
         private static readonly ImporterSettings Settings = ImporterSettings.Instance;
 
-        [MenuItem("Assets/Custom Import")]
+        [MenuItem("Assets/Custom Tools/Import")]
         public static void ShowWindow()
         {
             Init();
