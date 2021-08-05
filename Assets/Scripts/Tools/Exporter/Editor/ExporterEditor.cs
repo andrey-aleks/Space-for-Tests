@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 
 namespace Exporter.Editor
@@ -23,20 +24,21 @@ namespace Exporter.Editor
         {
             var exportObject = Selection.activeObject;
             var targetPath = EditorUtility.SaveFilePanel("Export as", "", exportObject.name + ".fbx", "fbx");
-            var fileFormat = AssetDatabase.GetAssetPath(exportObject).Split('\\').Last().Split('.').Last();
-            if (!string.IsNullOrEmpty(targetPath) && Settings.exportFileFormats.Contains(fileFormat))
-//                AssetDatabase.GetAssetPath(exportObject).Split('\\').Last().Contains(".fbx"))
+            
+            if (!string.IsNullOrEmpty(targetPath))
             {
-                var sourcePaths = Selection.assetGUIDs;
-                var sourcePath = Environment.CurrentDirectory + @"\" + AssetDatabase.GUIDToAssetPath(sourcePaths[0]);
-                var dependencies = AssetDatabase.GetDependencies(AssetDatabase.GUIDToAssetPath(sourcePaths[0]));
-
-                ExporterUtility.Export(sourcePath, targetPath, exportObject, dependencies);
+                ExporterUtility.Export(GetFullSourcePath(exportObject), targetPath);
             }
             else
             {
-                Debug.Log($"{NAME}wrong path or wrong object (must be fbx or FBX)");
+                Debug.Log($"{NAME}wrong path");
             }
+        }
+
+        private static string GetFullSourcePath(Object asset)
+        {
+            var sourceFullPath = Environment.CurrentDirectory + @"\" + AssetDatabase.GetAssetPath(asset);
+            return sourceFullPath;
         }
     }
 }
