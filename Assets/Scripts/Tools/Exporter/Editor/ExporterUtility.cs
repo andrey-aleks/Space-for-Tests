@@ -11,11 +11,10 @@ namespace Exporter.Editor
 {
     public class ExporterUtility : MonoBehaviour
     {
+        private static readonly ExporterSettings Settings = ExporterSettings.Instance;
+        
         private static string NAME = "[ExporterUtility]: ";
-
-        private static readonly List<string> ExportingTextureTypes = new List<string>()
-            {"png", "jpg", "jpeg", "tif", "tiff", "targa", "tga"};
-
+        
         public static void Export(string sourcePath, string targetPath, Object targetObject, string[] dependencies)
         {
             Regex fbxSubRegex = new Regex(@".fbx", RegexOptions.IgnoreCase);
@@ -35,12 +34,12 @@ namespace Exporter.Editor
             var targetTexFolder = Directory.CreateDirectory(targetDir.FullName + @"/Textures");
             foreach (var dep in dependencies)
             {
-                if (ExportingTextureTypes.Contains(dep.Split('.').Last()))
+                if (Settings.exportTextureFormats.Contains(dep.Split('.').Last()))
                 {
                     var targetDep = pathRegex.Replace(dep, @"\");
 
                     var textureName = targetDep.Split('\\').Last();
-                    if (texRegex.Matches(textureName).Count < 1)
+                    if (texRegex.Matches(textureName).Count < 1 && Settings.addTexturePrefix)
                     {
                         textureName = "tex_" + textureName;
                     }

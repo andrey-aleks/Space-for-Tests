@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -8,6 +9,8 @@ namespace Exporter.Editor
 {
     public class ExporterEditor : EditorWindow
     {
+        private static readonly ExporterSettings Settings = ExporterSettings.Instance;
+
         private static string NAME = "[ExporterEditor]: ";
 
         [MenuItem("Assets/Custom Tools/Export")]
@@ -20,8 +23,9 @@ namespace Exporter.Editor
         {
             var exportObject = Selection.activeObject;
             var targetPath = EditorUtility.SaveFilePanel("Export as", "", exportObject.name + ".fbx", "fbx");
-            if (!string.IsNullOrEmpty(targetPath) &&
-                AssetDatabase.GetAssetPath(exportObject).Split('\\').Last().Contains(".fbx"))
+            var fileFormat = AssetDatabase.GetAssetPath(exportObject).Split('\\').Last().Split('.').Last();
+            if (!string.IsNullOrEmpty(targetPath) && Settings.exportFileFormats.Contains(fileFormat))
+//                AssetDatabase.GetAssetPath(exportObject).Split('\\').Last().Contains(".fbx"))
             {
                 var sourcePaths = Selection.assetGUIDs;
                 var sourcePath = Environment.CurrentDirectory + @"\" + AssetDatabase.GUIDToAssetPath(sourcePaths[0]);
@@ -31,7 +35,7 @@ namespace Exporter.Editor
             }
             else
             {
-                Debug.Log($"{NAME}wrong path or wrong object (must be FBX)");
+                Debug.Log($"{NAME}wrong path or wrong object (must be fbx or FBX)");
             }
         }
     }

@@ -23,3 +23,4 @@ MonoBehaviour:
   occlusionMapName: _OcclusionMap
   textureFormat: .png
   enableOverwrite: 0
+  path: Assets/Custom Import
