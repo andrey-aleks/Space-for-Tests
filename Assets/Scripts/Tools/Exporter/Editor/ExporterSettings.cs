@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
 namespace Exporter.Editor
 {
-    [CreateAssetMenu(fileName = "CustomExportSettings", menuName = "Custom Export Settings", order = 1010)]
+    [CreateAssetMenu(fileName = "CustomExporterSettings", menuName = "Custom Exporter Settings", order = 1010)]
     public class ExporterSettings : ScriptableObject
     {
         [Tooltip(@"File formats that are available to export")]
@@ -26,9 +27,29 @@ namespace Exporter.Editor
 
         private static ExporterSettings LoadAsset([CallerFilePath] string callerFilepath = null)
         {
-            var path = GetAssetPath();
-            var asset = AssetDatabase.LoadAssetAtPath<ExporterSettings>(path);
+            var path = @"Assets\Data\Tools\CustomExporterSettings.asset";
+            if (!AssetDatabase.IsValidFolder(path.Remove(path.LastIndexOf('\\'))))
+            {
+                var tempPath = path.Remove(path.LastIndexOf('\\'));
+                if (!AssetDatabase.IsValidFolder(tempPath.Remove(tempPath.LastIndexOf('\\'))))
+                {
+                    AssetDatabase.CreateFolder(@"Assets", "Data");
+                    AssetDatabase.CreateFolder(@"Assets\Data", "Tools");
+                }
+                else
+                {
+                    AssetDatabase.CreateFolder(@"Assets\Data", "Tools");
+                }
+            }
 
+
+            var paths = AssetDatabase.FindAssets("t:ExporterSettings");
+            if (paths.Length > 0)
+            {
+                path = AssetDatabase.GUIDToAssetPath(paths[0]);
+            }
+
+            var asset = AssetDatabase.LoadAssetAtPath<ExporterSettings>(path);
             if (asset == null)
             {
                 asset = CreateInstance<ExporterSettings>();

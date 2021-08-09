@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b2aa069fc8dd8446903e3d7cbaddfce, type: 3}
-  m_Name: CustomExportSettings
+  m_Name: CustomExporterSettings
   m_EditorClassIdentifier: 
   exportFileFormats:
   - fbx
