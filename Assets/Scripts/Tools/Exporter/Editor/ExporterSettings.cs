@@ -22,6 +22,9 @@ namespace Exporter.Editor
         public bool addTexturePrefix = true;
 
 
+        private static readonly string NAME = "[ExporterSettings]: ";
+
+        
         private static ExporterSettings _instance;
         public static ExporterSettings Instance => _instance ?? (_instance = LoadAsset());
 
@@ -54,6 +57,7 @@ namespace Exporter.Editor
             {
                 asset = CreateInstance<ExporterSettings>();
                 AssetDatabase.CreateAsset(asset, path);
+                Debug.Log($@"{NAME}CustomExporterSettings created at path {path}");
                 AssetDatabase.SaveAssets();
             }
 
