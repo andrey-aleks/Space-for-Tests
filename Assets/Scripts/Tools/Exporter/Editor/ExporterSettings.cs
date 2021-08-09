@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Exporter.Editor
 {
-    [CreateAssetMenu(fileName = "CustomExporterSettings", menuName = "Custom Exporter Settings", order = 1010)]
+    [CreateAssetMenu(fileName = "CustomExporterSettings", menuName = "Custom Tools/Custom Exporter Settings", order = 1010)]
     public class ExporterSettings : ScriptableObject
     {
         [Tooltip(@"File formats that are available to export")]

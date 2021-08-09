@@ -19,7 +19,6 @@ namespace Importer.Editor
             Regex fbxRegex = new Regex(@"\w*\.fbx", RegexOptions.IgnoreCase);
             Regex meshRegex = new Regex(@"mesh_", RegexOptions.IgnoreCase);
             Regex matRegex = new Regex(@"mat_", RegexOptions.IgnoreCase);
-            Regex textureRegex = new Regex(@$"tex_\w*{Settings.textureFormat}", RegexOptions.IgnoreCase);
 
 
             // fbx import
@@ -95,18 +94,33 @@ namespace Importer.Editor
                     AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
                 }
 
-                var fullTextureName = textureRegex.Match(sourceTexturePath).Value;
+                var fullTextureName = sourceTexturePath.Substring(sourceTexturePath.LastIndexOf('\\'));
+                fullTextureName = fullTextureName.Replace("\\", ""); // remove first redundant \
                 var currentTexturePath = currentDir + filename + "\\Textures\\" + fullTextureName;
-                File.Copy(sourceTexturePath, currentTexturePath, Settings.enableOverwrite);
                 var projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + fullTextureName;
+                Regex formatSubRegex = new Regex("", RegexOptions.IgnoreCase);
+
+                foreach (var textureFormat in Settings.textureFormats)
+                {
+                    if (sourceTexturePath.Substring(sourceTexturePath.LastIndexOf('.')).Contains(textureFormat))
+                    {
+                        formatSubRegex = new Regex(textureFormat, RegexOptions.IgnoreCase);
+                        File.Copy(sourceTexturePath, currentTexturePath, Settings.enableOverwrite);
+                    }
+                }
+                if (formatSubRegex.ToString() == "")
+                {
+                    Debug.LogError($@"{NAME}{fullTextureName} doesn't match available texture formats! It wasn't imported");
+                    continue;
+                }
+
                 AssetDatabase.ImportAsset(projectTexturePath);
 
                 // textureName mess
                 Regex texSubRegex = new Regex(@"tex_", RegexOptions.IgnoreCase);
-                Regex pngSubRegex = new Regex(Settings.textureFormat, RegexOptions.IgnoreCase);
-
+                
                 var textureName = texSubRegex.Replace(fullTextureName, "");
-                textureName = pngSubRegex.Replace(textureName, "");
+                textureName = formatSubRegex.Replace(textureName, "");
                 var textureType = textureName.Split('_').Last();
 
                 Regex typeSubRegex = new Regex(textureType, RegexOptions.IgnoreCase);

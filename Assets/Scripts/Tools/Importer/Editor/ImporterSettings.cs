@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEditor;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace Importer.Editor
 {
-    [CreateAssetMenu(fileName = "CustomImporterSettings", menuName = "Custom Importer Settings", order = 1010)]
+    [CreateAssetMenu(fileName = "CustomImporterSettings", menuName = "Custom Tools/Custom Importer Settings", order = 1010)]
     public class ImporterSettings : ScriptableObject
     {
         //[Tooltip(@"Should tool process drag&dropped files or not?")]
@@ -36,7 +37,7 @@ namespace Importer.Editor
         public string occlusionMapName = "_OcclusionMap";
 
         [Tooltip(@"Texture format with '.' at start. Example: .png")]
-        public string textureFormat = ".png";
+        public List<string> textureFormats = new List<string>() {".png"};
 
         [Tooltip(@"Should importer overwrite existing files?")]
         public bool enableOverwrite = false;
