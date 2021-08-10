@@ -68,7 +68,7 @@ namespace Importer.Editor
                 if (mat.name.Split('_').Last().Equals(Settings.tileMaterialPostfix))
                 {
                     var tileMats = AssetDatabase.FindAssets($"{mat.name} t:Material");
-                    if (tileMats.Any())
+                    if (tileMats.Length > 1)
                     {
                         var modelImporter =
                             AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mat)) as ModelImporter;

@@ -8,7 +8,7 @@ namespace Exporter.Editor
     {
         private static readonly string NAME = "[ExporterEditor]: "; // name for debug
 
-        [MenuItem("Assets/Custom Tools/Export")]
+        [MenuItem("Assets/Custom Tools/Export #_e")]
         public static void ShowWindow()
         {
             Init();
@@ -20,7 +20,7 @@ namespace Exporter.Editor
             var sourcePath = ExporterUtility.GetFullSourcePath(exportObject);
 
             var targetPath =
-                EditorUtility.SaveFilePanel("Export as", "", exportObject.name + ".fbx",
+                EditorUtility.SaveFilePanel("Export File", "", exportObject.name + ".fbx",
                     "fbx"); // open dialog window for export and get target path from this
 
             if (!string.IsNullOrEmpty(targetPath))

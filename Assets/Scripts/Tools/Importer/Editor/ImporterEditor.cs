@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditor.ShortcutManagement;
 
 namespace Importer.Editor
 {
@@ -6,7 +7,7 @@ namespace Importer.Editor
     {
         private static readonly ImporterSettings Settings = ImporterSettings.Instance;
 
-        [MenuItem("Assets/Custom Tools/Import")]
+        [MenuItem("Assets/Custom Tools/Import #_q")]
         public static void ShowWindow()
         {
             Init();
@@ -14,7 +15,7 @@ namespace Importer.Editor
 
         private static void Init()
         {
-            string path = EditorUtility.OpenFilePanel("Open File", "", "");
+            string path = EditorUtility.OpenFilePanel("Import File", "", "");
             if (!string.IsNullOrEmpty(path))
             {
                 ImporterUtility.Import(path);
