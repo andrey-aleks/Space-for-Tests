@@ -35,6 +35,8 @@ namespace Importer.Editor
 
         [Tooltip(@"Property name for the current texture in the Shader")]
         public string occlusionMapName = "_OcclusionMap";
+        
+        public string tileMaterialPostfix = "T";
 
         [Tooltip(@"Texture format with '.' at start. Example: .png")]
         public List<string> textureFormats = new List<string>() {".png"};

@@ -60,18 +60,49 @@ namespace Importer.Editor
 
             foreach (var model in importedModels)
             {
-                var message = AssetDatabase.ExtractAsset(model,
-                    Settings.parentFolder + filename + @"\Materials\" + model.name + ".mat"); // extract materials
+                if (model.name.Split('_').Last().Equals(Settings.tileMaterialPostfix))
+                {
+                    // не импортит обычные не тайловые маты
+                    var tileMats = AssetDatabase.FindAssets(model.name);
+                    if (tileMats.Length > 0)
+                    {
+                        var modelImporter =
+                            AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(model)) as ModelImporter;
+                        if (modelImporter != null)
+                        {
+                            modelImporter.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName,
+                                ModelImporterMaterialSearch.Everywhere);
+                        }
+                    }
+                    else
+                    {
+                        var message = AssetDatabase.ExtractAsset(model,
+                            Settings.parentFolder + filename + @"\Materials\" + model.name +
+                            ".mat"); // extract materials
+
+                        if (!string.IsNullOrEmpty(message))
+                        {
+                            Debug.Log(NAME + message); // log if error
+                        }
+                    }
+                }
+                else
+                {
+                    var message = AssetDatabase.ExtractAsset(model,
+                        Settings.parentFolder + filename + @"\Materials\" + model.name +
+                        ".mat"); // extract materials
+
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        Debug.Log(NAME + message); // log if error
+                    }
+                }
+
                 var materialAsset =
                     AssetDatabase.LoadAssetAtPath<Material>(Settings.parentFolder + filename + @"\Materials\" +
                                                             model.name + ".mat");
-
                 materialsNames.Add(matRegex.Replace(model.name, ""),
                     materialAsset); // add mat.name(w/o mat_) and mat to Dictionary
-                if (!string.IsNullOrEmpty(message))
-                {
-                    Debug.Log(NAME + message); // log if error
-                }
             }
 
 
@@ -88,6 +119,7 @@ namespace Importer.Editor
                     return;
                 }
 
+
                 // create Textures folder under /Settings.parentFolder/filename/
                 if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures"))
                 {
@@ -96,6 +128,12 @@ namespace Importer.Editor
 
                 var fullTextureName = sourceTexturePath.Substring(sourceTexturePath.LastIndexOf('\\'));
                 fullTextureName = fullTextureName.Replace("\\", ""); // remove first redundant \
+                var tileTexs = AssetDatabase.FindAssets(fullTextureName);
+                foreach (var tileTex in tileTexs)
+                {
+                    Debug.Log("tile tex " + tileTex);
+                }
+
                 var currentTexturePath = currentDir + filename + "\\Textures\\" + fullTextureName;
                 var projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + fullTextureName;
                 Regex formatSubRegex = new Regex("", RegexOptions.IgnoreCase);
@@ -108,9 +146,11 @@ namespace Importer.Editor
                         File.Copy(sourceTexturePath, currentTexturePath, Settings.enableOverwrite);
                     }
                 }
+
                 if (formatSubRegex.ToString() == "")
                 {
-                    Debug.LogError($@"{NAME}{fullTextureName} doesn't match available texture formats! It wasn't imported");
+                    Debug.LogError(
+                        $@"{NAME}{fullTextureName} doesn't match available texture formats! It wasn't imported");
                     continue;
                 }
 
@@ -118,7 +158,7 @@ namespace Importer.Editor
 
                 // textureName mess
                 Regex texSubRegex = new Regex(@"tex_", RegexOptions.IgnoreCase);
-                
+
                 var textureName = texSubRegex.Replace(fullTextureName, "");
                 textureName = formatSubRegex.Replace(textureName, "");
                 var textureType = textureName.Split('_').Last();
