@@ -5,20 +5,22 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Importer.Editor
 {
     public static class ImporterUtility
     {
         private const string NAME = "[ImporterUtility]: ";
+        private static Dictionary<string, object> materialsNames = new Dictionary<string, object>();
+
         private static readonly ImporterSettings Settings = ImporterSettings.Instance;
 
         public static void Import(string sourceFilePath)
         {
-            // regex some inits
+            // inits some regex 
             Regex fbxRegex = new Regex(@"\w*\.fbx", RegexOptions.IgnoreCase);
-            Regex meshRegex = new Regex(@"mesh_", RegexOptions.IgnoreCase);
-            Regex matRegex = new Regex(@"mat_", RegexOptions.IgnoreCase);
+            Regex meshRegex = new Regex("^(mesh_)", RegexOptions.IgnoreCase);
 
 
             // fbx import
@@ -36,12 +38,6 @@ namespace Importer.Editor
                     filename); // -1 because of redundant "/" at the end
             }
 
-            // create Materials folder under /Settings.parentFolder/filename/
-            if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Materials"))
-            {
-                AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Materials");
-            }
-
             var currentDir = Environment.CurrentDirectory + @"\" + Settings.parentFolder;
 
             File.Copy(sourceFilePath, $"{currentDir}{filename}\\mesh_{filename}.fbx",
@@ -53,21 +49,29 @@ namespace Importer.Editor
 
 
             // materials import
-            var importedModels = AssetDatabase.LoadAllAssetsAtPath(currentModelPath)
+            materialsNames.Clear();
+            var importedMaterials = AssetDatabase.LoadAllAssetsAtPath(currentModelPath)
                 .Where(x => x.GetType() == typeof(Material)); // get all materials from fbx
 
-            var materialsNames = new Dictionary<string, object>();
-
-            foreach (var model in importedModels)
+            if (importedMaterials.Any())
             {
-                if (model.name.Split('_').Last().Equals(Settings.tileMaterialPostfix))
+                // create Materials folder under /Settings.parentFolder/filename/
+                if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Materials"))
                 {
-                    // не импортит обычные не тайловые маты
-                    var tileMats = AssetDatabase.FindAssets(model.name);
-                    if (tileMats.Length > 0)
+                    AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Materials");
+                }
+            }
+
+
+            foreach (var mat in importedMaterials)
+            {
+                if (mat.name.Split('_').Last().Equals(Settings.tileMaterialPostfix))
+                {
+                    var tileMats = AssetDatabase.FindAssets(mat.name);
+                    if (tileMats.Any())
                     {
                         var modelImporter =
-                            AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(model)) as ModelImporter;
+                            AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mat)) as ModelImporter;
                         if (modelImporter != null)
                         {
                             modelImporter.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName,
@@ -76,74 +80,42 @@ namespace Importer.Editor
                     }
                     else
                     {
-                        var message = AssetDatabase.ExtractAsset(model,
-                            Settings.parentFolder + filename + @"\Materials\" + model.name +
-                            ".mat"); // extract materials
-
-                        if (!string.IsNullOrEmpty(message))
-                        {
-                            Debug.Log(NAME + message); // log if error
-                        }
+                        ExtractMaterial(mat, filename);
                     }
                 }
                 else
                 {
-                    var message = AssetDatabase.ExtractAsset(model,
-                        Settings.parentFolder + filename + @"\Materials\" + model.name +
-                        ".mat"); // extract materials
-
-                    if (!string.IsNullOrEmpty(message))
-                    {
-                        Debug.Log(NAME + message); // log if error
-                    }
+                    ExtractMaterial(mat, filename);
                 }
-
-                var materialAsset =
-                    AssetDatabase.LoadAssetAtPath<Material>(Settings.parentFolder + filename + @"\Materials\" +
-                                                            model.name + ".mat");
-                materialsNames.Add(matRegex.Replace(model.name, ""),
-                    materialAsset); // add mat.name(w/o mat_) and mat to Dictionary
             }
 
 
             // textures import
             var texturePath = sourceFolderPath + @"Textures\";
-            Material material = null;
 
             foreach (var sourceTexturePath in Directory.GetFiles(texturePath))
             {
+                Material material = null;
+
                 // check if textures exists 
                 if (Directory.GetFiles(texturePath).Length < 1)
                 {
                     Debug.Log($"{NAME}for {filename} there are no textures!");
-                    return;
-                }
-
-
-                // create Textures folder under /Settings.parentFolder/filename/
-                if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures"))
-                {
-                    AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
+                    break;
                 }
 
                 var fullTextureName = sourceTexturePath.Substring(sourceTexturePath.LastIndexOf('\\'));
                 fullTextureName = fullTextureName.Replace("\\", ""); // remove first redundant \
-                var tileTexs = AssetDatabase.FindAssets(fullTextureName);
-                foreach (var tileTex in tileTexs)
-                {
-                    Debug.Log("tile tex " + tileTex);
-                }
 
-                var currentTexturePath = currentDir + filename + "\\Textures\\" + fullTextureName;
-                var projectTexturePath = Settings.parentFolder + filename + "\\Textures\\" + fullTextureName;
+
                 Regex formatSubRegex = new Regex("", RegexOptions.IgnoreCase);
 
                 foreach (var textureFormat in Settings.textureFormats)
                 {
                     if (sourceTexturePath.Substring(sourceTexturePath.LastIndexOf('.')).Contains(textureFormat))
                     {
-                        formatSubRegex = new Regex(textureFormat, RegexOptions.IgnoreCase);
-                        File.Copy(sourceTexturePath, currentTexturePath, Settings.enableOverwrite);
+                        formatSubRegex = new Regex($"{textureFormat}$", RegexOptions.IgnoreCase);
+                        break;
                     }
                 }
 
@@ -154,21 +126,43 @@ namespace Importer.Editor
                     continue;
                 }
 
-                AssetDatabase.ImportAsset(projectTexturePath);
-
                 // textureName mess
-                Regex texSubRegex = new Regex(@"tex_", RegexOptions.IgnoreCase);
+                Regex texSubRegex = new Regex("^(tex_)", RegexOptions.IgnoreCase);
 
                 var textureName = texSubRegex.Replace(fullTextureName, "");
                 textureName = formatSubRegex.Replace(textureName, "");
+                var textureNameWOFormat = textureName;
                 var textureType = textureName.Split('_').Last();
 
-                Regex typeSubRegex = new Regex(textureType, RegexOptions.IgnoreCase);
+                Regex typeSubRegex = new Regex($"{textureType}$", RegexOptions.IgnoreCase);
                 textureName = typeSubRegex.Replace(textureName, "");
                 textureName = textureName.Remove(textureName.Length - 1);
 
+                if (textureName.Split('_').Last().Equals($@"{Settings.tileMaterialPostfix}"))
+                {
+                    var tileTexs = AssetDatabase.FindAssets(textureNameWOFormat);
+                    if (tileTexs.Any())
+                    {
+                        continue;
+                    }
+                }
+
+                // create Textures folder under /Settings.parentFolder/filename/
+                if (!AssetDatabase.IsValidFolder(Settings.parentFolder + filename + "/Textures"))
+                {
+                    AssetDatabase.CreateFolder(Settings.parentFolder + filename, "Textures");
+                }
+
+                var targetTexturePath = currentDir + filename + "\\Textures\\" + fullTextureName;
+                var assetTexturePath = Settings.parentFolder + filename + "\\Textures\\" + fullTextureName;
+
+                File.Copy(sourceTexturePath, targetTexturePath, Settings.enableOverwrite);
+                AssetDatabase.ImportAsset(assetTexturePath);
+                
+                Debug.Log("tex name " + textureName+"_"+textureType);
                 foreach (var mat in materialsNames)
                 {
+                    Debug.Log("mat.Key " + mat.Key);
                     if (textureName.Equals(mat.Key))
                     {
                         material = (Material) mat.Value;
@@ -178,17 +172,37 @@ namespace Importer.Editor
 
                 if (material == null)
                 {
-                    Debug.Log($"{NAME} texture {textureName}_{textureType} doesn't matches with materials names!");
-                    continue;
+                    Debug.Log(
+                        $"{NAME}texture {textureName}_{textureType} doesn't match with the imported materials names!");
                 }
                 else
                 {
-                    SetTexture(projectTexturePath, textureType, material); // textures setting to material
+                    SetTexture(assetTexturePath, textureType, material); // textures setting to material
                 }
             }
 
             AssetDatabase.ImportAsset(currentModelPath);
             AssetDatabase.SaveAssets();
+        }
+
+        private static void ExtractMaterial(Object mat, string filename)
+        {
+            Regex matRegex = new Regex(@"mat_", RegexOptions.IgnoreCase);
+
+            var message = AssetDatabase.ExtractAsset(mat,
+                Settings.parentFolder + filename + @"\Materials\" + mat.name +
+                ".mat"); // extract materials
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                Debug.Log(NAME + message); // log if error
+            }
+
+            var materialAsset =
+                AssetDatabase.LoadAssetAtPath<Material>(Settings.parentFolder + filename + @"\Materials\" +
+                                                        mat.name + ".mat");
+            materialsNames.Add(matRegex.Replace(mat.name, ""),
+                materialAsset); // add mat.name(w/o mat_) and mat to Dictionary 
         }
 
         private static void SetTexture(string texturePath, string textureType, Material targetMaterial)
