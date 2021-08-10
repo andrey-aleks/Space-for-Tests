@@ -67,7 +67,7 @@ namespace Importer.Editor
             {
                 if (mat.name.Split('_').Last().Equals(Settings.tileMaterialPostfix))
                 {
-                    var tileMats = AssetDatabase.FindAssets(mat.name);
+                    var tileMats = AssetDatabase.FindAssets($"{mat.name} t:Material");
                     if (tileMats.Any())
                     {
                         var modelImporter =
@@ -76,6 +76,8 @@ namespace Importer.Editor
                         {
                             modelImporter.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName,
                                 ModelImporterMaterialSearch.Everywhere);
+                            Debug.Log(
+                                $"{NAME}materials were remapped because of existing tile material. Check if other model's materials were not changed");
                         }
                     }
                     else
@@ -140,7 +142,7 @@ namespace Importer.Editor
 
                 if (textureName.Split('_').Last().Equals($@"{Settings.tileMaterialPostfix}"))
                 {
-                    var tileTexs = AssetDatabase.FindAssets(textureNameWOFormat);
+                    var tileTexs = AssetDatabase.FindAssets($"{textureNameWOFormat} t:Texture2D");
                     if (tileTexs.Any())
                     {
                         continue;
@@ -158,11 +160,9 @@ namespace Importer.Editor
 
                 File.Copy(sourceTexturePath, targetTexturePath, Settings.enableOverwrite);
                 AssetDatabase.ImportAsset(assetTexturePath);
-                
-                Debug.Log("tex name " + textureName+"_"+textureType);
+
                 foreach (var mat in materialsNames)
                 {
-                    Debug.Log("mat.Key " + mat.Key);
                     if (textureName.Equals(mat.Key))
                     {
                         material = (Material) mat.Value;
