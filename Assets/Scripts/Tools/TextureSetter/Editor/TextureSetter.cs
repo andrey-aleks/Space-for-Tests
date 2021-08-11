@@ -2,13 +2,13 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace TextureSetter.Editor
 {
-    public class TextureSetter
+    public static class TextureSetter
     {
-        public static string nameForDebug = "[TextureSetter]: ";
+        private static readonly string NAME = "[TextureSetter]: "; // name for debug
         
-        [MenuItem("Assets/Set textures")]
+        [MenuItem("Assets/Artist Tools/Set textures to mat")]
         public static void ShowWindow()
         {
             SetTextures();
@@ -21,7 +21,7 @@ namespace Editor
             {
                 foreach (var obj in Selection.objects)
                 {
-                    if (obj.name.Split('_').First().Equals("mat"))
+                    if (obj is Material)
                     {
                         targetMat = (Material) obj;
                     }
@@ -29,38 +29,38 @@ namespace Editor
 
                 if (targetMat == null)
                 {
-                    Debug.Log(nameForDebug + "Material not found");
+                    Debug.Log(NAME + "Material not found");
                     return;                
                 }
                 
                 foreach (var obj in Selection.objects)
                 {
-                    if (obj.name.Split('_').First().Equals("tex"))
+                    if (obj is Texture2D)
                     {
                         switch (obj.name.Split('_').Last())
                         {
                             case "BC":
                                 targetMat.SetTexture("_BaseMap", (Texture)obj);
-                                Debug.Log(nameForDebug + obj.name + " is set to " + targetMat.name);
+                                Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                             case "N":
                                 targetMat.SetTexture("_BumpMap", (Texture)obj);
-                                Debug.Log(nameForDebug + obj.name + " is set to " + targetMat.name);
+                                Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                             case "MS":
                                 targetMat.SetTexture("_MetallicGlossMap", (Texture)obj);
-                                Debug.Log(nameForDebug + obj.name + " is set to " + targetMat.name);
+                                Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                             case "AO":
                                 targetMat.SetTexture("_OcclusionMap", (Texture)obj);
-                                Debug.Log(nameForDebug + obj.name + " is set to " + targetMat.name);
+                                Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                         }
-                        EditorApplication.ExecuteMenuItem("File/Save Project");
                     } 
                 }
+                AssetDatabase.SaveAssets();
             }
-            else Debug.Log(nameForDebug + " no active objects");
+            else Debug.Log(NAME + " no active objects");
         }
     }
 }

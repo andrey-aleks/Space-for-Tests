@@ -8,7 +8,7 @@ namespace Exporter.Editor
     {
         private static readonly string NAME = "[ExporterEditor]: "; // name for debug
 
-        [MenuItem("Assets/Custom Tools/Export #_e")]
+        [MenuItem("Assets/Artist Tools/Import-Export/Export #_e")]
         public static void ShowWindow()
         {
             Init();
