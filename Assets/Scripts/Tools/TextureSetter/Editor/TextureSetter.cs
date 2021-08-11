@@ -7,7 +7,7 @@ namespace TextureSetter.Editor
     public static class TextureSetter
     {
         private static readonly string NAME = "[TextureSetter]: "; // name for debug
-        
+
         [MenuItem("Assets/Artist Tools/Set textures to mat")]
         public static void ShowWindow()
         {
@@ -30,9 +30,9 @@ namespace TextureSetter.Editor
                 if (targetMat == null)
                 {
                     Debug.Log(NAME + "Material not found");
-                    return;                
+                    return;
                 }
-                
+
                 foreach (var obj in Selection.objects)
                 {
                     if (obj is Texture2D)
@@ -40,24 +40,25 @@ namespace TextureSetter.Editor
                         switch (obj.name.Split('_').Last())
                         {
                             case "BC":
-                                targetMat.SetTexture("_BaseMap", (Texture)obj);
+                                targetMat.SetTexture("_BaseMap", (Texture) obj);
                                 Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                             case "N":
-                                targetMat.SetTexture("_BumpMap", (Texture)obj);
+                                targetMat.SetTexture("_BumpMap", (Texture) obj);
                                 Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                             case "MS":
-                                targetMat.SetTexture("_MetallicGlossMap", (Texture)obj);
+                                targetMat.SetTexture("_MetallicGlossMap", (Texture) obj);
                                 Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                             case "AO":
-                                targetMat.SetTexture("_OcclusionMap", (Texture)obj);
+                                targetMat.SetTexture("_OcclusionMap", (Texture) obj);
                                 Debug.Log(NAME + obj.name + " was set to " + targetMat.name);
                                 break;
                         }
-                    } 
+                    }
                 }
+
                 AssetDatabase.SaveAssets();
             }
             else Debug.Log(NAME + " no active objects");
