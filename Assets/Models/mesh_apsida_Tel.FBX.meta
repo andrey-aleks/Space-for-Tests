@@ -6,7 +6,12 @@ ModelImporter:
   - first:
       74: 1827226128182048838
     second: Take 001
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal_cosyrki
+    second: {fileID: 2100000, guid: 6e30f4c9869177b4b9362db2cce3dfa6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
