@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace ComponentRemover.Editor
@@ -15,7 +17,7 @@ namespace ComponentRemover.Editor
         private readonly string NAME = "[ComponentRemover] ";
 
 
-        [MenuItem("Tools/Artist Tools/ComponentRemover")]
+        [MenuItem("Tools/Custom Tools/ComponentRemover")]
         public static void ShowWindow()
         {
             GetWindow<ComponentRemover>("Component Remover");
@@ -52,7 +54,7 @@ namespace ComponentRemover.Editor
                 }
             }
 
-            GUILayout.Label("Don't forget to apply changes to prefab. \nYou should create empty game object and delete it, it will cause changes in prefab");
+            GUILayout.Label("Don't forget to apply changes to prefab");
         }
 
         private void RemoveComponents(string targetComponentName)
@@ -75,6 +77,13 @@ namespace ComponentRemover.Editor
                         DestroyImmediate(components[i]);
                         Debug.Log(NAME + childComponentName + " at " + childObjectName + " was REMOVED");
                     }
+                }
+                
+                // mark prefab as dirty
+                var prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
+                if (prefabStage != null)
+                {
+                    EditorSceneManager.MarkSceneDirty(prefabStage.scene);
                 }
             }
 
