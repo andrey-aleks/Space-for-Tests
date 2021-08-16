@@ -221,6 +221,7 @@ namespace Importer.Editor
                 var textureImporter =
                     AssetImporter.GetAtPath(texturePath) as TextureImporter;
                 textureImporter.textureType = TextureImporterType.NormalMap;
+                textureImporter.SaveAndReimport();
                 return;
             }
 
