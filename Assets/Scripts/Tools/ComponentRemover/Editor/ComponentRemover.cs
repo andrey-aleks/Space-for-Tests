@@ -17,7 +17,7 @@ namespace ComponentRemover.Editor
         private readonly string NAME = "[ComponentRemover] ";
 
 
-        [MenuItem("Tools/Custom Tools/ComponentRemover")]
+        [MenuItem("CROC/Editor Tools/Component Remover")]
         public static void ShowWindow()
         {
             GetWindow<ComponentRemover>("Component Remover");
@@ -70,7 +70,7 @@ namespace ComponentRemover.Editor
 
                 for (int i = 0; i < components.Count; i++)
                 {
-                    var childComponentName = components[i].GetType().ToString().Split('.').Last(); // split because it returns UnityEngine.{Type}
+                    var childComponentName = components[i].GetType().Name; // split because it returns UnityEngine.{Type}
                     if (childComponentName.Equals(targetComponentName))
                     {
                         var childObjectName = components[i].name;
