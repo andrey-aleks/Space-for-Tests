@@ -93,6 +93,7 @@ namespace Exporter.Editor
                 }
             }
 
+            EditorUtility.RevealInFinder(targetFolder.FullName); // open Explorer
             Debug.Log($@"{NAME}{sourcePath.Split('\\').Last()} exported to {targetFolder.FullName}\"); // log if ok
         }
 
