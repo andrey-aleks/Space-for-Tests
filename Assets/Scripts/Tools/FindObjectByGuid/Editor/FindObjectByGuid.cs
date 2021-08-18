@@ -9,7 +9,7 @@ namespace FindObjectByGuid.Editor
 
         private readonly string NAME = "[FindObjectByGuid]: ";
         
-        [MenuItem("Tools/Custom Tools/Find object by GUID")]
+        [MenuItem("CROC/Editor Tools/Find object by GUID")]
         public static void ShowWindow()
         {
             GetWindow<FindObjectByGuid >("Find object by GUID", true);

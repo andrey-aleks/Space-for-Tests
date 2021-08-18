@@ -182,6 +182,8 @@ namespace Importer.Editor
             }
 
             AssetDatabase.ImportAsset(currentModelPath);
+            Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(currentModelPath);
+            EditorGUIUtility.PingObject(Selection.activeObject);
             AssetDatabase.SaveAssets();
         }
 
@@ -221,6 +223,7 @@ namespace Importer.Editor
                 var textureImporter =
                     AssetImporter.GetAtPath(texturePath) as TextureImporter;
                 textureImporter.textureType = TextureImporterType.NormalMap;
+                textureImporter.SaveAndReimport();
                 return;
             }
 
