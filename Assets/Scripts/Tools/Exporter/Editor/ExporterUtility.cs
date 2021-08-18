@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,20 +24,18 @@ namespace Exporter.Editor
         /// <param name="targetPath"></param>
         public static void Export(string sourcePath, string targetPath)
         {
-            Regex pathRegex = new Regex(@"/", RegexOptions.IgnoreCase); // regex for replacing / to \
-
-            sourcePath = pathRegex.Replace(sourcePath, @"\"); // replace / to \ in the source path
-            targetPath = pathRegex.Replace(targetPath, @"\"); // replace / to \ in the target path
+            sourcePath = sourcePath.Replace(@"/", @"\");
+            targetPath = targetPath.Replace(@"/", @"\"); // replace / to \ in the target path
 
             var sourceAssetPath =
                 sourcePath.Substring(sourcePath.LastIndexOf("\\Assets\\", StringComparison.Ordinal) +
                                      1); // get asset path (starts with Assets\)
 
-            var fileFormat = sourceAssetPath.Split('\\').Last().Split('.').Last(); // get file's format (word after .)
+            var fileFormat = Path.GetExtension(sourceAssetPath);
 
             if (!Settings.exportFileFormats.Contains(fileFormat)) // validate file's format 
             {
-                Debug.LogError($@"{NAME}trying to export the wrong object (must be fbx or FBX)");
+                Debug.LogError($@"{NAME}trying to export the wrong object (must be .fbx or .FBX)");
                 return;
             }
 
@@ -44,8 +43,7 @@ namespace Exporter.Editor
 
             var targetFolder =
                 Directory.CreateDirectory(fbxSubRegex.Replace(targetPath, "")); // create target folder for file
-            var targetName = targetPath.Split('\\').Last().Split('.').First(); // get target file's name
-
+            var targetName = Path.GetFileNameWithoutExtension(targetPath);
             Regex meshRegex = new Regex(@"^mesh_", RegexOptions.IgnoreCase); // regex for validating mesh_ prefix
 
             if (meshRegex.Matches(targetName).Count == 0) // validate mesh_ prefix
@@ -57,54 +55,43 @@ namespace Exporter.Editor
                 targetFolder.FullName + @"\" + targetName + ".fbx"); // copy file from sourcePath to targetPath
 
             var targetTexFolder =
-                Directory.CreateDirectory(targetFolder.FullName + @"/Textures"); // create Textures folder
+                Directory.CreateDirectory(targetFolder.FullName + @"\Textures"); // create Textures folder
 
             Regex texRegex = new Regex(@"^tex_", RegexOptions.IgnoreCase); // regex for validating tex_ prefix
 
             var assetDependencies =
-                AssetDatabase.GetDependencies(sourceAssetPath); // get file's dependencies (as button "Select Dependencies")
+                AssetDatabase
+                    .GetDependencies(sourceAssetPath); // get file's dependencies (as button "Select Dependencies")
 
             foreach (var dep in assetDependencies)
             {
-                var textureFormat = dep.Split('.').Last(); // get texture format
+                var textureFormat = Path.GetExtension(dep);
                 if (Settings.exportTextureFormats.Contains(textureFormat)) // validate texture's format
                 {
-                    var targetDep = pathRegex.Replace(dep, @"\"); // replace / to \ in the dep path
+                    var targetDep = dep.Replace(@"/", @"\"); // replace / to \ in the dep path
 
-                    var textureName = targetDep.Split('\\').Last(); // get texture name
+                    var textureName = Path.GetFileNameWithoutExtension(targetDep);
                     if (texRegex.Matches(textureName).Count == 0 &&
                         Settings.addTexturePrefix) // validate tex_ prefix & settings (should add prefix or not)
                     {
                         textureName = "tex_" + textureName; // add tex_ prefix
                     }
 
-                    var sourceDepPath =
-                        Environment.CurrentDirectory + @"\" + targetDep; // get full source texture path
-                    
+                    var sourceDepPath = Path.GetFullPath(targetDep);
+
                     try // try - because of chance of double textures in 1 fbx (>1 mats with the same textures)
                     {
-                        File.Copy(sourceDepPath, targetTexFolder.FullName + @"\" + textureName); // try to copy texture 
+                        File.Copy(sourceDepPath, targetTexFolder.FullName + @"\" + textureName + textureFormat); // try to copy texture 
                     }
                     catch (Exception e)
                     {
                         Debug.Log(NAME + e); // log if error
-                        continue;
                     }
                 }
             }
 
             EditorUtility.RevealInFinder(targetFolder.FullName); // open Explorer
             Debug.Log($@"{NAME}{sourcePath.Split('\\').Last()} exported to {targetFolder.FullName}\"); // log if ok
-        }
-
-        /// <summary>
-        /// Get full path of Unity asset
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <returns></returns>
-        public static string GetFullSourcePath(Object asset)
-        {
-            return Environment.CurrentDirectory + @"\" + AssetDatabase.GetAssetPath(asset);
         }
     }
 }

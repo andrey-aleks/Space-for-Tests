@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using UnityEditor.ShortcutManagement;
 
 namespace Importer.Editor
 {
@@ -20,8 +19,6 @@ namespace Importer.Editor
             {
                 ImporterUtility.Import(path);
             }
-
-            // ImportSettings.Instance.path = EditorUtility.OpenFilePanel("Open File", "", "");
         }
 
 

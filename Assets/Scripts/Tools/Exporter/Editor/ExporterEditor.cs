@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 
@@ -17,7 +18,7 @@ namespace Exporter.Editor
         private static void Init()
         {
             var exportObject = Selection.activeObject; // get selected object
-            var sourcePath = ExporterUtility.GetFullSourcePath(exportObject);
+            var sourcePath = Path.GetFullPath(AssetDatabase.GetAssetPath(exportObject));
 
             var targetPath =
                 EditorUtility.SaveFilePanel("Export File", "", exportObject.name + ".fbx",

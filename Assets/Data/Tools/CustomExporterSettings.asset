@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: CustomExporterSettings
   m_EditorClassIdentifier: 
   exportFileFormats:
-  - fbx
-  - FBX
+  - .fbx
+  - .FBX
   exportTextureFormats:
-  - png
-  - jpg
-  - jpeg
-  - tif
-  - tiff
-  - targa
-  - tga
+  - .png
+  - .jpg
+  - .jpeg
+  - .tif
+  - .tiff
+  - .targa
+  - .tga
   addTexturePrefix: 1

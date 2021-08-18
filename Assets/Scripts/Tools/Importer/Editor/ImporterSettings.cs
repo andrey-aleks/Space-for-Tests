@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Importer.Editor
 {
-    [CreateAssetMenu(fileName = "CustomImporterSettings", menuName = "Custom Tools/Custom Importer Settings", order = 1010)]
+    [CreateAssetMenu(fileName = "CustomImporterSettings", menuName = "CROC/Artist Tools/Custom Importer Settings", order = 1010)]
     public class ImporterSettings : ScriptableObject
     {
         //[Tooltip(@"Should tool process drag&dropped files or not?")]
@@ -83,13 +83,6 @@ namespace Importer.Editor
             }
 
             return asset;
-        }
-
-        private static string GetAssetPath([CallerFilePath] string callerFilePath = null)
-        {
-            var folder = Path.GetDirectoryName(callerFilePath);
-            folder = folder.Substring(folder.LastIndexOf("\\Assets\\", StringComparison.Ordinal) + 1);
-            return Path.Combine(folder, "CustomImportSettings.asset");
         }
     }
 }
