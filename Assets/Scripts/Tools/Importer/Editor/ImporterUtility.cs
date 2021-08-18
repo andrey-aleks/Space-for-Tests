@@ -26,7 +26,7 @@ namespace Importer.Editor
             // fbx import
             var sourceFolderPath = fbxRegex.Replace(sourceFilePath, ""); // get source folder path
 
-            var filename = sourceFilePath.Split('/').Last().Split('.').First(); // get name of fbx
+            var filename = Path.GetFileNameWithoutExtension(sourceFilePath); // get name of fbx
 
             filename = meshRegex.Replace(filename, ""); // remove mesh_ from name
 
@@ -38,21 +38,25 @@ namespace Importer.Editor
                     filename); // -1 because of redundant "/" at the end
             }
 
-            var currentDir = Environment.CurrentDirectory + @"\" + Settings.parentFolder;
+            var currentDir = Path.GetFullPath(Settings.parentFolder);
 
             File.Copy(sourceFilePath, $"{currentDir}{filename}\\mesh_{filename}.fbx",
                 Settings.enableOverwrite); // copy fbx to assets
 
             Debug.Log($"{NAME}fbx {filename} imported to folder {Settings.parentFolder}{filename}\\");
+            
             string currentModelPath = $"{Settings.parentFolder}{filename}\\mesh_{filename}.fbx";
             AssetDatabase.ImportAsset(currentModelPath);
 
 
             // materials import
             materialsNames.Clear();
+//            var importedMaterials = AssetDatabase.LoadAllAssetsAtPath(currentModelPath)
+//                .Where(x => x.GetType() == typeof(Material)); // get all materials from fbx
+            
             var importedMaterials = AssetDatabase.LoadAllAssetsAtPath(currentModelPath)
-                .Where(x => x.GetType() == typeof(Material)); // get all materials from fbx
-
+                .Where(x => x is Material); // get all materials from fbx
+            
             if (importedMaterials.Any())
             {
                 // create Materials folder under /Settings.parentFolder/filename/
@@ -62,13 +66,12 @@ namespace Importer.Editor
                 }
             }
 
-
             foreach (var mat in importedMaterials)
             {
-                if (mat.name.Split('_').Last().Equals(Settings.tileMaterialPostfix))
+                if (mat.name.Split('_').Last().Equals(Settings.tileMaterialPostfix)) // check tile mat postfix
                 {
                     var tileMats = AssetDatabase.FindAssets($"{mat.name} t:Material");
-                    if (tileMats.Length > 1)
+                    if (tileMats.Length > 1) // first is embed mat itself, second will be the existing tile material
                     {
                         var modelImporter =
                             AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mat)) as ModelImporter;
@@ -110,18 +113,27 @@ namespace Importer.Editor
                 fullTextureName = fullTextureName.Replace("\\", ""); // remove first redundant \
 
 
-                Regex formatSubRegex = new Regex("", RegexOptions.IgnoreCase);
-
+                //Regex formatSubRegex = new Regex("", RegexOptions.IgnoreCase);
+                var allowTextureImport = false;
                 foreach (var textureFormat in Settings.textureFormats)
                 {
-                    if (sourceTexturePath.Substring(sourceTexturePath.LastIndexOf('.')).Contains(textureFormat))
+                    if (Path.GetExtension(sourceTexturePath).Contains(textureFormat))
                     {
-                        formatSubRegex = new Regex($"{textureFormat}$", RegexOptions.IgnoreCase);
+                        //formatSubRegex = new Regex($"{textureFormat}$", RegexOptions.IgnoreCase);
+                        allowTextureImport = true;
                         break;
                     }
                 }
 
-                if (formatSubRegex.ToString() == "")
+                /*if (formatSubRegex.ToString() == "")
+                {
+                    Debug.LogError(
+                        $@"{NAME}{fullTextureName} doesn't match available texture formats! It wasn't imported");
+                    continue;
+                }
+                */
+
+                if (!allowTextureImport)
                 {
                     Debug.LogError(
                         $@"{NAME}{fullTextureName} doesn't match available texture formats! It wasn't imported");
@@ -132,17 +144,18 @@ namespace Importer.Editor
                 Regex texSubRegex = new Regex("^(tex_)", RegexOptions.IgnoreCase);
 
                 var textureName = texSubRegex.Replace(fullTextureName, "");
-                textureName = formatSubRegex.Replace(textureName, "");
-                var textureNameWOFormat = textureName;
+
+                //textureName = formatSubRegex.Replace(textureName, "");
+                textureName = Path.GetFileNameWithoutExtension(textureName);
+                var textureNameWithoutExtension = textureName;
+                
                 var textureType = textureName.Split('_').Last();
 
-                Regex typeSubRegex = new Regex($"{textureType}$", RegexOptions.IgnoreCase);
-                textureName = typeSubRegex.Replace(textureName, "");
-                textureName = textureName.Remove(textureName.Length - 1);
+                textureName = textureName.Remove(textureName.LastIndexOf('_'));
 
                 if (textureName.Split('_').Last().Equals($@"{Settings.tileMaterialPostfix}"))
                 {
-                    var tileTexs = AssetDatabase.FindAssets($"{textureNameWOFormat} t:Texture2D");
+                    var tileTexs = AssetDatabase.FindAssets($"{textureNameWithoutExtension} t:Texture2D");
                     if (tileTexs.Any())
                     {
                         continue;
@@ -177,19 +190,19 @@ namespace Importer.Editor
                 }
                 else
                 {
-                    SetTexture(assetTexturePath, textureType, material); // textures setting to material
+                    SetTexture(assetTexturePath, textureType, material); // set textures to material
                 }
             }
 
-            AssetDatabase.ImportAsset(currentModelPath);
-            Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(currentModelPath);
-            EditorGUIUtility.PingObject(Selection.activeObject);
+            AssetDatabase.ImportAsset(currentModelPath); // reimport fbx
+            Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(currentModelPath); // select fbx as active
+            EditorGUIUtility.PingObject(Selection.activeObject); // ping (highlight) fbx in assets folder
             AssetDatabase.SaveAssets();
         }
 
         private static void ExtractMaterial(Object mat, string filename)
         {
-            Regex matRegex = new Regex(@"mat_", RegexOptions.IgnoreCase);
+            Regex matRegex = new Regex(@"^(mat_)", RegexOptions.IgnoreCase);
 
             var message = AssetDatabase.ExtractAsset(mat,
                 Settings.parentFolder + filename + @"\Materials\" + mat.name +
