@@ -182,6 +182,8 @@ namespace Importer.Editor
             }
 
             AssetDatabase.ImportAsset(currentModelPath);
+            Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(currentModelPath);
+            EditorGUIUtility.PingObject(Selection.activeObject);
             AssetDatabase.SaveAssets();
         }
 
