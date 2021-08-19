@@ -56,14 +56,14 @@ namespace Importer.Editor
             var importedMaterials = AssetDatabase.LoadAllAssetsAtPath(currentModelPath)
                 .Where(x => x is Material); // get all materials from fbx
 
-            if (importedMaterials.Any())
+            /*if (importedMaterials.Any())
             {
                 // create Materials folder under /Settings.parentFolder/filename/
                 if (!AssetDatabase.IsValidFolder(mainAssetFolder + "/Materials"))
                 {
                     AssetDatabase.CreateFolder(mainAssetFolder, "Materials");
                 }
-            }
+            }*/
 
             foreach (var mat in importedMaterials)
             {
@@ -133,6 +133,13 @@ namespace Importer.Editor
 
                 targetMatPath = tileMatPath + @"\" + mat.name + @".mat";
             }
+            else
+            {
+                if (!AssetDatabase.IsValidFolder(mainAssetFolder + @"\Materials")) // create Tiles materials folder
+                {
+                    AssetDatabase.CreateFolder(mainAssetFolder, @"Materials");
+                }
+            }
 
             targetMatPath = targetMatPath.Replace(@"/", @"\");
             var message = AssetDatabase.ExtractAsset(mat, targetMatPath); // extract materials
@@ -168,6 +175,7 @@ namespace Importer.Editor
                 }
             }
 
+            // проверить не созждаются ли пустые папки для матов и текстур
             if (!allowTextureImport)
             {
                 Debug.LogError(
@@ -201,20 +209,21 @@ namespace Importer.Editor
                 // set tile path
                 targetTextureRootFolder = @"Assets\Textures";
                 targetTextureMainFolder = @"\Tiles";
-                
+
                 if (!AssetDatabase.IsValidFolder(targetTextureRootFolder + targetTextureMainFolder))
                 {
                     AssetDatabase.CreateFolder(targetTextureRootFolder, targetTextureMainFolder.Replace(@"\", ""));
                 }
-                
-                if (!AssetDatabase.IsValidFolder(targetTextureRootFolder + targetTextureMainFolder + @"\" + textureName.Remove(textureName.LastIndexOf('_'))))
+
+                if (!AssetDatabase.IsValidFolder(targetTextureRootFolder + targetTextureMainFolder + @"\" +
+                                                 textureName.Remove(textureName.LastIndexOf('_'))))
                 {
-                    AssetDatabase.CreateFolder(targetTextureRootFolder + targetTextureMainFolder, textureName.Remove(textureName.LastIndexOf('_')));
+                    AssetDatabase.CreateFolder(targetTextureRootFolder + targetTextureMainFolder,
+                        textureName.Remove(textureName.LastIndexOf('_')));
                 }
-                
+
                 targetTextureRootFolder = @"Assets\Textures\Tiles";
                 targetTextureMainFolder = @"\" + textureName.Remove(textureName.LastIndexOf('_'));
-
             }
             else
             {
@@ -225,7 +234,7 @@ namespace Importer.Editor
                 }
             }
 
-            
+
             // set paths
             var assetTexturePath = targetTextureRootFolder + targetTextureMainFolder + @"\" + fullTextureName;
             var targetTexturePath = Path.GetFullPath(assetTexturePath);
