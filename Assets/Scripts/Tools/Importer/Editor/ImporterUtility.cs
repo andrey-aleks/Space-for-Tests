@@ -186,6 +186,9 @@ namespace Importer.Editor
             var textureType = textureName.Split('_').Last();
 
             textureName = textureName.Remove(textureName.LastIndexOf('_'));
+            // set default path
+            var targetTextureRootFolder = mainAssetFolder;
+            var targetTextureMainFolder = @"\Textures";
 
             if (textureName.Split('_').Last().Equals($@"{Settings.tileMaterialPostfix}"))
             {
@@ -194,17 +197,38 @@ namespace Importer.Editor
                 {
                     return;
                 }
-            }
 
-            // create Textures folder under /Settings.parentFolder/filename/
-            if (!AssetDatabase.IsValidFolder(mainAssetFolder + "/Textures"))
+                // set tile path
+                targetTextureRootFolder = @"Assets\Textures";
+                targetTextureMainFolder = @"\Tiles";
+                
+                if (!AssetDatabase.IsValidFolder(targetTextureRootFolder + targetTextureMainFolder))
+                {
+                    AssetDatabase.CreateFolder(targetTextureRootFolder, targetTextureMainFolder.Replace(@"\", ""));
+                }
+                
+                if (!AssetDatabase.IsValidFolder(targetTextureRootFolder + targetTextureMainFolder + @"\" + textureName.Remove(textureName.LastIndexOf('_'))))
+                {
+                    AssetDatabase.CreateFolder(targetTextureRootFolder + targetTextureMainFolder, textureName.Remove(textureName.LastIndexOf('_')));
+                }
+                
+                targetTextureRootFolder = @"Assets\Textures\Tiles";
+                targetTextureMainFolder = @"\" + textureName.Remove(textureName.LastIndexOf('_'));
+
+            }
+            else
             {
-                AssetDatabase.CreateFolder(mainAssetFolder, "Textures");
+                // create Textures folder under /Settings.parentFolder/filename/
+                if (!AssetDatabase.IsValidFolder(targetTextureRootFolder + targetTextureMainFolder))
+                {
+                    AssetDatabase.CreateFolder(targetTextureRootFolder, targetTextureMainFolder.Replace(@"\", ""));
+                }
             }
 
-            var targetTexturePath =
-                Path.GetFullPath(mainAssetFolder) + "\\Textures\\" + fullTextureName;
-            var assetTexturePath = mainAssetFolder + "\\Textures\\" + fullTextureName;
+            
+            // set paths
+            var assetTexturePath = targetTextureRootFolder + targetTextureMainFolder + @"\" + fullTextureName;
+            var targetTexturePath = Path.GetFullPath(assetTexturePath);
 
             File.Copy(sourceTexturePath, targetTexturePath, Settings.enableOverwrite);
             AssetDatabase.ImportAsset(assetTexturePath);
