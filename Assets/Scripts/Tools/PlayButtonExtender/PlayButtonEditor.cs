@@ -30,6 +30,9 @@ namespace Tools.PlayButtonExtender
     [InitializeOnLoad]
     public class PlayButtonEditor : MonoBehaviour
     {
+        public static DateTime StartTime;
+        public static float TimeForWaiting = 0.5f;
+        
         static PlayButtonEditor()
         {
             ToolbarExtender.LeftToolbarGUI.Add(OnToolbarGUI);
@@ -44,13 +47,25 @@ namespace Tools.PlayButtonExtender
                 if (EditorApplication.isPlaying)
                 {
                     EditorApplication.ExitPlaymode();
-                    LoadScenes();
+                    StartTime = DateTime.Now;
+                    EditorApplication.update += WaitAndLoad;
                 }
                 else
                 {
                     UnloadScenes();
                     EditorApplication.EnterPlaymode();
                 }
+            }
+        }
+
+        private static void WaitAndLoad()
+        {
+            Debug.Log("WAIT");
+            if (DateTime.Now.Second - StartTime.Second > TimeForWaiting)
+            {
+                Debug.Log("SUCCESS");
+                LoadScenes();
+                EditorApplication.update -= WaitAndLoad;
             }
         }
 
@@ -90,7 +105,8 @@ namespace Tools.PlayButtonExtender
                     EditorSceneManager.UnloadSceneAsync(scene);
                 }
             }
-
+            EditorUtility.SetDirty(source);
+            AssetDatabase.SaveAssets();
             if (!SceneManager.GetSceneByName(source.MainSceneName).IsValid())
             {
                 var mainSceneGuid = AssetDatabase.FindAssets(source.MainSceneName).First();
@@ -111,8 +127,16 @@ namespace Tools.PlayButtonExtender
             EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
         }
 
+        public static IEnumerator WaitAndLoadScenes(float seconds)
+        {
+            Debug.Log("LOOOG 1");
+            yield return new WaitForSeconds(seconds);
+            Debug.Log("LOOOG 2");
+            LoadScenes();
+        }
 
-        [MenuItem("CROC/Load Saved Scenes#_g")]
+
+        [MenuItem("CROC/Load Saved Scenes #_g")]
         private static void LoadScenes()
         {
            
