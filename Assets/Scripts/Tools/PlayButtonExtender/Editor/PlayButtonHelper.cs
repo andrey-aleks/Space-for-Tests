@@ -9,9 +9,9 @@ namespace Tools.PlayButtonExtender
     [CreateAssetMenu(fileName = "PlayButtonHelper", menuName = "CROC/Artist Tools/PlayButtonHelper", order = 1020)]
     public class PlayButtonHelper : ScriptableObject
     {
-        public List<string> LoadedScenesPaths = new List<string>();
-        public string ActiveScenePath;
-        public string MainSceneName = "LoaderScene";
+        public List<string> UnloadedScenesPaths = new List<string>(); // list of unloaded scene paths
+        public string ActiveScenePath; // active scene path
+        public string MainSceneName = "LoaderScene"; // default loader scene name
         
         private static readonly string NAME = "[PlayButtonHelper]: ";
         private static PlayButtonHelper _instance;

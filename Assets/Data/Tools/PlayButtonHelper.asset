@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b26af67816eed6c48aad7cf1b0d457f6, type: 3}
   m_Name: PlayButtonHelper
   m_EditorClassIdentifier: 
-  LoadedScenesPaths:
-  - Assets/Scenes/LoaderScene.unity
+  UnloadedScenesPaths:
+  - Assets/Scenes/StuffScene.unity
   - Assets/Scenes/MaterialAdderScene.unity
   - Assets/Scenes/ShaderScene.unity
-  ActiveScenePath: Assets/Scenes/LoaderScene.unity
+  - Assets/Scenes/LoaderScene.unity
+  ActiveScenePath: Assets/Scenes/MaterialAdderScene.unity
   MainSceneName: LoaderScene
